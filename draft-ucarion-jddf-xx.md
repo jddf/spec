@@ -459,7 +459,7 @@ JSON-based messaging systems:
 
 ## Extending JDDF's syntax
 
-This document does not describe any extension mechanisms for JSL schema
+This document does not describe any extension mechanisms for JDDF schema
 validation, which is described in {{semantics}}. However, schemas (through the
 `non-keyword` CDDL rule in {{syntax}) are defined to allow members whose names
 are not equal to any of the specially-defined keywords (i.e. `definitions`,
@@ -1182,7 +1182,7 @@ The JDDF schema {} accepts the same instances as the CDDL rule:
 root = any
 ~~~
 
-The JSL schema:
+The JDDF schema:
 
 ~~~ json
 {
@@ -1254,7 +1254,7 @@ Corresponds to the CDDL rule:
 root = [* number]
 ~~~
 
-The JSL schema:
+The JDDF schema:
 
 ~~~ json
 {
