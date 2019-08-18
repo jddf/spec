@@ -1,18 +1,18 @@
-# The JSON Data Definition Language Spec
+# The JSON Data Definition Format Spec
 
 This document contains the work-in-progress IETF Internet Draft for JSON Data
-Definition Language ("JDDL"), as well as a test suite to aid in verifying
-whether an implementation of JDDL is correct.
+Definition Format ("JDDF"), as well as a test suite to aid in verifying whether
+an implementation of JDDF is correct.
 
 ## Test Format
 
 This repo contains tests to help implementors verify that they're implementing
-JDDL correctly. These tests are located in the `tests` directory.
+JDDF correctly. These tests are located in the `tests` directory.
 
 ### Invalid Schema Tests
 
 In `tests/invalid-schemas.json` are examples of data which are valid JSON, but
-not valid schemas. The exact rules for what is and isn't a JDDL schema are a bit
+not valid schemas. The exact rules for what is and isn't a JDDF schema are a bit
 complex. This file helps the implementor nail down all the corner cases.
 
 This file is an array of objects containing:
@@ -20,7 +20,7 @@ This file is an array of objects containing:
 * `name`, a human-readable description of why the "schema" is invalid, and
 * `schema`, a JSON value that is not a correct schema
 
-The contents of `tests/invalid-schema.json` can be described with this JDDL
+The contents of `tests/invalid-schema.json` can be described with this JDDF
 schema:
 
 ```json
@@ -45,7 +45,7 @@ validator should return when evaluating the instance against the schema.
 Each of these files is an array of objects containing:
 
 * `name`, a human-readable name describing the schema
-* `schema`, a correct JDDL schema to validate against
+* `schema`, a correct JDDF schema to validate against
 * `strictInstance`, whether the validator should use strict instance semantics
 * `instances`, an array of objects containing:
   * `instance`, a JSON value that should be validated against the schema
@@ -58,7 +58,7 @@ specified. Therefore it's fine if your implementation produces the same errors,
 just in a different order.
 
 The contents of each of the files in `tests/validation` can be described with
-this JDDL schema:
+this JDDF schema:
 
 ```json
 {
