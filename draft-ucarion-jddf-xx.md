@@ -25,6 +25,7 @@ normative:
   RFC8610:
 informative:
   RFC7071:
+  RFC7493:
 
 --- abstract
 
@@ -59,6 +60,33 @@ JDDF is homoiconic (it both describes, and is written in, JSON) yet is incapable
 of describing in detail its own structure. By keeping the expressiveness of the
 schema language minimal, JDDF makes code generation and standardized errors
 easier to implement.
+
+JDDF's feature set is designed to represent common patterns in JSON-using
+applications, while still having a clear correspondence to programming languages
+in widespread use. Thus, JDDF supports:
+
+- Signed and unsigned 8, 16, and 32-bit integers. A tool which converts JDDF
+  schemas into code can use `int8_t`, `uint8_t`, `int16_t`, etc., or their
+  equivalents in the target language, to represent these JDDF types.
+
+- A distinction between `float32` and `float64`. Code generators can use `float`
+  and `double`, or their equivalents, for these JDDF types.
+
+- A "properties" form of JSON objects, corresponding to some sort of struct.
+
+- A "values" form of JSON objects, corresponding to some sort of dictionary or
+  associative array.
+
+- A "discriminator" form of JSON objects, corresponding to a discriminated (or
+  "tagged") union.
+
+The principle of common patterns in JSON is why JDDF does not support 64-bit
+integers, as these are usually transmitted over JSON in a non-interoperable
+(i.e., not respecting the recommendations in Section 2.2 of {{RFC7493}}) or
+mutually inconsistent (e.g., using hexadecimal versus base64) ways.
+
+The principle of clear correspondence to common programming languages is why
+JDDF does not support, for example, a data type for numbers up to 2**53-1.
 
 It is expected that for many use-cases, a schema language of JDDF's
 expressiveness is sufficient. Where a more expressive language is required,
@@ -103,7 +131,7 @@ data.
 schema = {
   form,
   ? definitions: { * tstr => schema },
-  ? strict: bool,
+  ? additionalProperties: bool,
   * non-keyword => *
 }
 
@@ -111,7 +139,7 @@ schema = {
 ; keywords defined later.
 non-keyword =
   (((((((((tstr .ne "definitions")
-    .ne "strict")
+    .ne "additionalProperties")
     .ne "ref")
     .ne "type")
     .ne "enum")
@@ -205,8 +233,8 @@ thing twice:
   "definitions": {
     "coordinates": {
       "properties": {
-        "lat": { "type": "number" },
-        "lng": { "type": "number" }
+        "lat": { "type": "float32" },
+        "lng": { "type": "float32" }
       }
     }
   },
@@ -222,7 +250,7 @@ exist:
 
 ~~~ json
 {
-  "definitions": { "foo": { "type": "number" }},
+  "definitions": { "foo": { "type": "float32" }},
   "ref": "bar"
 }
 ~~~
@@ -232,9 +260,9 @@ exist at the root level. The non-root definition is immaterial:
 
 ~~~ json
 {
-  "definitions": { "foo": { "type": "number" }},
+  "definitions": { "foo": { "type": "float32" }},
   "elements": {
-    "definitions": { "bar": { "type": "number" }},
+    "definitions": { "bar": { "type": "float32" }},
     "ref": "bar"
   }
 }
@@ -246,7 +274,7 @@ type. The precise meaning of each of the primitive types is described in
 
 ~~~ cddl
 type = { type: "boolean" / num-type / "string" / "timestamp" }
-num-type = "number" / "float32" / "float64" /
+num-type = "float32" / "float64" /
   "int8" / "uint8" / "int16" / "uint16" / "int32" / "uint32"
 ~~~
 {: #cddl-type title="CDDL Definition of the Type Form"}
@@ -363,7 +391,7 @@ values = { values: * tstr => schema }
 Thus, this is a correct schema, describing a mapping from strings to numbers:
 
 ~~~ json
-{ "values": { "type": "number" }}
+{ "values": { "type": "float32" }}
 ~~~
 
 Finally, the eighth form, `discriminator`, describes JSON objects being used as
@@ -397,8 +425,8 @@ and a member name in one of the `mapping` member `properties`:
 {
   "tag": "event_type",
   "mapping": {
-    "is_event_type_a_string_or_a_number?": {
-      "properties": { "event_type": { "type": "number" }}
+    "is_event_type_a_string_or_a_float32?": {
+      "properties": { "event_type": { "type": "float32" }}
     }
   }
 }
@@ -429,11 +457,13 @@ JSON-based messaging systems:
 }
 ~~~
 
+## Extending JDDF's syntax
+
 This document does not describe any extension mechanisms for JSL schema
-validation. However, schemas (through the `non-keyword` CDDL rule in this
-section) are defined to allow members whose names are not equal to any of the
-specially-defined keywords (i.e. `definitions`, `elements`, etc.) described in
-this section. Call these members "non-keyword members".
+validation, which is described in {{semantics}}. However, schemas (through the
+`non-keyword` CDDL rule in {{syntax}) are defined to allow members whose names
+are not equal to any of the specially-defined keywords (i.e. `definitions`,
+`elements`, etc.). Call these members "non-keyword members".
 
 Users MAY add additional, non-keyword members to JDDF schemas to convey
 information that is not pertinent to validation. For example, such non-keyword
@@ -450,7 +480,7 @@ in {{semantics}}, works.
 This section describes when an instance is valid against a correct JDDF schema,
 and the standardized errors to produce when an instance is invalid.
 
-## Allowing unknown properties
+## Allowing additional properties {#allow-additional-properties}
 
 Users will have different desired behavior with respect to "unspcecified"
 members in an instance. For example:
@@ -462,21 +492,15 @@ members in an instance. For example:
 Some users may expect that {"a": "foo", "b": "bar"} satisfies the above schema.
 Others may disagree, as `b` is not one of the properties described in the
 schema. In this document, allowing such "unspecified" members happens when
-evaluation is "allowing unknown properties".
+evaluation is in "allow additional properties" mode.
 
-Evaluation of a schema does not allow unknown properties by default, but can be
-overridden by setting `allowUnknownProperties: true` on the schema. That
-override will be inheritied by sub-schemas, but sub-schemas may always override
-`allowUknownProperties`.
+Evaluation of a schema does not allow additional properties by default, but can
+be overridden by setting `additionalProperties: true` on the schema.
 
-More formally, validation of a schema *S* allows unknown properties if:
-
-- Let *A* be the schemas which contain *S* and which have a member named
-  `allowUnknownProperties`. *S* is considered to contain itself, and so is a
-  member of *A* if it has a member named `allowUnknownProperties`.
-
-If *A* is empty, then validation of *S* does not allow for unknown properties.
-Otherwise, let *P* be the element of *A* contained by all other members of *A*. Validation of *S* uses
+More formally, evaluation of a schema *S* is in "allow additional properties"
+mode if there exists a member of *S* whose name equals `additionalProperties`,
+and whose value is a boolean `true`. Otherwise, evaluation of *S* is not in
+"allow additional properties" mode.
 
 See {{semantics-form-props}} for how allowing unknown properties affects schema
 evaluation, but briefly, the following schema:
@@ -489,12 +513,29 @@ Rejects {"a": "foo", "b": "bar"}, but the schema:
 
 ~~~ json
 {
-  "strict": false,
+  "additionalProperties": true,
   "properties": { "a": { "type": "string" }}
 }
 ~~~
 
 Accepts {"a": "foo", "b": "bar"}.
+
+Note that `additionalProperties` does not get "inherited" by sub-schemas. For
+example, this schema:
+
+~~~ json
+{
+  "additionalProperties": true,
+  "elements": {
+    "properties": {
+      "a": { "type": "string" }
+    }
+  }
+}
+~~~
+
+Rejects \[{"a": "foo", "b": "bar"}\]. The `additionalProperties` at the root
+level does not affect the behavior of the sub-schema within `elements`.
 
 ## Errors
 
@@ -556,7 +597,7 @@ For example, the schema:
 
 ~~~ json
 {
-  "definitions": { "a": { "type": "number" }},
+  "definitions": { "a": { "type": "float32" }},
   "ref": "a"
 }
 ~~~
@@ -573,7 +614,7 @@ Thus, with the schema:
 
 ~~~ json
 {
-  "definitions": { "a": { "type": "number" }},
+  "definitions": { "a": { "type": "float32" }},
   "elements": {
     "definitions": { "a": { "type": "boolean" }},
     "ref": "foo"
@@ -604,7 +645,6 @@ as a function of *T*'s value:
 | If \_T\_ equals ...  | then the instance is accepted if it is ...  |
 |---------------------+----------------------------------------------|
 | boolean   | equal to `true` or `false`                             |
-| number    | a JSON number                                          |
 | float32   | a JSON number                                          |
 | float64   | a JSON number                                          |
 | int8      | See {{int-ranges}}                                     |
@@ -618,12 +658,12 @@ as a function of *T*'s value:
 |---------------------+----------------------------------------------|
 {: #type-values title="Accepted Values for Type"}
 
-`float32` and `float64` are distinguished from `number` in their intent.
+`float32` and `float64` are distinguished from each other in their intent.
 `float32` indicates data intended to be processed as an IEEE 754
 single-precision float, whereas `float64` indicates data intended to be
-processed as an IEEE 754 double-precision float. `number` indicates no specific
-intent. Tools which generate code from JDDF schemas will likely produce
-different code for `float32`, `float64`, and `number`.
+processed as an IEEE 754 double-precision float. Tools which generate code from
+JDDF schemas will likely produce different code for `float32` than for
+`float64`.
 
 If _T_ starts with `int` or `uint`, then the instance is accepted if and only if
 it is a JSON number encoding a value with zero fractional part. Depending on the
@@ -653,7 +693,7 @@ the schema member with the name `type`.
 For example:
 
 - The schema {"type": "boolean"} accepts false, but rejects 127.
-- The schema {"type": "number"} accepts 10.5, 127 and 128, but rejects false.
+- The schema {"type": "float32"} accepts 10.5, 127 and 128, but rejects false.
 - The schema {"type": "int8"} accepts 127, but rejects 10.5, 128 and false.
 - The schema {"type": "string"} accepts "1985-04-12T23:20:50.52Z" and "foo", but
   rejects 127.
@@ -714,7 +754,7 @@ For example, if we have the schema:
 ~~~ json
 {
   "elements": {
-    "type": "number"
+    "type": "float32"
   }
 }
 ~~~
@@ -774,8 +814,9 @@ if all of the following are true:
   have such a member. If the "discriminator tag exemption" is in effect on *I*
   (see {{semantics-form-discriminator}}), then ignore *I*. Otherwise:
 
-  - If no such member in *P* or *O* exists and validation is using strict
-    instance semantics, then the instance is rejected.
+  - If no such member in *P* or *O* exists and validation is not in "allow
+    additional properties" mode (see {{allow-additional-properties}}), then the
+    instance is rejected.
 
     The standard error for this case has an `instancePath` pointing to *I*, and
     a `schemaPath` pointing to the schema.
@@ -826,7 +867,7 @@ If instead we evalute the instance:
 { "b": 3, "c": 3, "e": 3 }
 ~~~
 
-The standard errors, using strict instance semantics, are:
+The standard errors are:
 
 ~~~ json
 [
@@ -841,8 +882,47 @@ The standard errors, using strict instance semantics, are:
 ]
 ~~~
 
-If we the same instance were evaluated, but without strict instance semantics,
-the final element of the above array of errors would not be present.
+If instead the schema had `additionalProperties: true`, but was otherwise the
+same:
+
+~~~ json
+{
+  "properties": {
+    "a": { "type": "string" },
+    "b": { "type": "string" }
+  },
+  "optionalProperties": {
+    "c": { "type": "string" },
+    "d": { "type": "string" }
+  },
+  "additionalProperties": true
+}
+~~~
+
+And the instance remained the same:
+
+~~~ json
+{ "b": 3, "c": 3, "e": 3 }
+~~~
+
+Then the errors from evaluating the instance against that `additionalProperties:
+true` schema would be:
+
+~~~ json
+[
+  { "instancePath": "",
+    "schemaPath": "/properties/a" },
+  { "instancePath": "/b",
+    "schemaPath": "/properties/b/type" },
+  { "instancePath": "/c",
+    "schemaPath": "/optionalProperties/c/type" },
+]
+~~~
+
+These are the same errors as before, except the final error (associated with the
+additional member named `e` in the instance) is no longer present. This is
+because `additionalProperties: true` enables "allow additional properties" mode
+on the schema.
 
 ### Values
 
@@ -867,7 +947,7 @@ For example, if we have the schema:
 ~~~ json
 {
   "values": {
-    "type": "number"
+    "type": "float32"
   }
 }
 ~~~
@@ -967,7 +1047,7 @@ To illustrate the discriminator form, if we have the schema:
     "mapping": {
       "v1": {
         "properties": {
-          "a": { "type": "number" }
+          "a": { "type": "float32" }
         }
       },
       "v2": {
@@ -1066,10 +1146,11 @@ Finally, if instead the instance were:
 { "version": "v2", "a": "foo" }
 ~~~
 
-Then the instance satisfies the schema. No standard errors are returned. This
-would be the case even if evaluation were using strict instance semantics, as
-the "discriminator tag exemption" would ensure that `version` is not treated as
-an unexpected property when evaluating the instance against *S*'s value.
+Then the instance satisfies the schema. No standard errors are returned. This is
+the case despite the fact that `version` is not mentioned by
+`/discriminator/mapping/v2/properties`; the "discriminator tag exemption"
+ensures that `version` is not treated as an additional property when evaluating
+the instance against *S*'s value.
 
 # IANA Considerations
 
@@ -1107,7 +1188,7 @@ The JSL schema:
 {
   "definitions": {
     "a": { "elements": { "ref": "b" }},
-    "b": { "type": "number" }
+    "b": { "type": "float32" }
   },
   "elements": {
     "ref": "a"
@@ -1142,7 +1223,8 @@ The JDDF schema {"type": "boolean"} corresponds to the CDDL rule:
 root = bool
 ~~~
 
-The JDDF schema {"type": "number"} corresponds to the CDDL rule:
+The JDDF schemas {"type": "float32"} and {"type": "float64"} both correspond to
+the CDDL rule:
 
 ~~~ cddl
 root = number
@@ -1163,7 +1245,7 @@ root = tdate
 The JDDF schema:
 
 ~~~ json
-{ "elements": { "type": "number" }}
+{ "elements": { "type": "float32" }}
 ~~~
 
 Corresponds to the CDDL rule:
@@ -1178,7 +1260,7 @@ The JSL schema:
 {
   "properties": {
     "a": { "type": "boolean" },
-    "b": { "type": "number" }
+    "b": { "type": "float32" }
   },
   "optionalProperties": {
     "c": { "type": "string" },
@@ -1196,7 +1278,7 @@ root = { a: bool, b: number, ? c: tstr, ? d: tdate }
 The JDDF schema:
 
 ~~~ json
-{ "values": { "type": "number" }}
+{ "values": { "type": "float32" }}
 ~~~
 
 Corresponds to the CDDL rule:
@@ -1214,7 +1296,7 @@ Finally, the JDDF schema:
     "mapping": {
       "foo": {
         "properties": {
-          "b": { "type": "number" }
+          "b": { "type": "float32" }
         }
       },
       "bar": {
@@ -1247,6 +1329,7 @@ plain-English definition `reputation-object` described in Section 6.2.2 of
     "application": { "type": "string" },
     "reputons": {
       "elements": {
+        "additionalProperties": true,
         "properties": {
           "rater": { "type": "string" },
           "assertion": { "type": "string" },
@@ -1256,9 +1339,9 @@ plain-English definition `reputation-object` described in Section 6.2.2 of
         "optionalProperties": {
           "confidence": { "type": "float32" },
           "normal-rating": { "type": "float32" },
-          "sample-size": { "type": "number" },
-          "generated": { "type": "number" },
-          "expires": { "type": "number" }
+          "sample-size": { "type": "float64" },
+          "generated": { "type": "float64" },
+          "expires": { "type": "float64" }
         }
       }
     }
@@ -1266,10 +1349,10 @@ plain-English definition `reputation-object` described in Section 6.2.2 of
 }
 ~~~
 
-This schema does not support `ext-value`, and does not enforce the requirement
-that `generated` and `expires` be unbounded positive integers. It does not
-express the limitation that `rating`, `confidence`, and `normal-rating` should
-not have more than three decimal places of precision.
+This schema does not enforce the requirement that `sample-size`, `generated`,
+and `expires` be unbounded positive integers. It does not express the limitation
+that `rating`, `confidence`, and `normal-rating` should not have more than three
+decimal places of precision.
 
 This can be compared against the equivalent example in Appendix H of
 {{RFC8610}}.
