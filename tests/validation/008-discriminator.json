@@ -180,6 +180,7 @@
         "tag": "arrayOf",
         "mapping": {
           "strings": {
+            "additionalProperties": true,
             "properties": {
               "values": {
                 "elements": {
@@ -189,6 +190,7 @@
             }
           },
           "booleans": {
+            "additionalProperties": true,
             "properties": {
               "values": {
                 "elements": {
