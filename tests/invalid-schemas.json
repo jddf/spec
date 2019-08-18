@@ -309,13 +309,13 @@
         "foo": {}
       },
       "ref": "foo",
-      "type": "number"
+      "type": "float32"
     }
   },
   {
     "name": "schema both type and enum",
     "schema": {
-      "type": "number",
+      "type": "float32",
       "enum": [
         "foo"
       ]
