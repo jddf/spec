@@ -1,0 +1,40 @@
+[
+  {
+    "name": "empty schema",
+    "schema": {},
+    "instances": [
+      {
+        "instance": null,
+        "errors": []
+      },
+      {
+        "instance": true,
+        "errors": []
+      },
+      {
+        "instance": 3.14,
+        "errors": []
+      },
+      {
+        "instance": 3,
+        "errors": []
+      },
+      {
+        "instance": "foo",
+        "errors": []
+      },
+      {
+        "instance": "1937-01-01T12:00:27.87+00:20",
+        "errors": []
+      },
+      {
+        "instance": [],
+        "errors": []
+      },
+      {
+        "instance": {},
+        "errors": []
+      }
+    ]
+  }
+]

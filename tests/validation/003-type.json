@@ -1,0 +1,656 @@
+[
+  {
+    "name": "type boolean",
+    "schema": {
+      "type": "boolean"
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": true,
+        "errors": []
+      },
+      {
+        "instance": 3.14,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": 3,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": "foo",
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": "1937-01-01T12:00:27.87+00:20",
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": [],
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": {},
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "type float32",
+    "schema": {
+      "type": "float32"
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": 3,
+        "errors": []
+      },
+      {
+        "instance": 3.14,
+        "errors": []
+      },
+      {
+        "instance": "foo",
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": "1937-01-01T12:00:27.87+00:20",
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": [],
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": {},
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "type float64",
+    "schema": {
+      "type": "float64"
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": 3,
+        "errors": []
+      },
+      {
+        "instance": 3.14,
+        "errors": []
+      },
+      {
+        "instance": "foo",
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": "1937-01-01T12:00:27.87+00:20",
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": [],
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": {},
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "type int8",
+    "schema": {
+      "type": "int8"
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": 3.14,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": -129,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": -128,
+        "errors": []
+      },
+      {
+        "instance": 127,
+        "errors": []
+      },
+      {
+        "instance": 128,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "type uint8",
+    "schema": {
+      "type": "uint8"
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": 3.14,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": -1,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": 0,
+        "errors": []
+      },
+      {
+        "instance": 255,
+        "errors": []
+      },
+      {
+        "instance": 256,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "type int16",
+    "schema": {
+      "type": "int16"
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": 3.14,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": -32769,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": -32768,
+        "errors": []
+      },
+      {
+        "instance": 32767,
+        "errors": []
+      },
+      {
+        "instance": 32768,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "type uint16",
+    "schema": {
+      "type": "uint16"
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": 3.14,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": -1,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": 0,
+        "errors": []
+      },
+      {
+        "instance": 65535,
+        "errors": []
+      },
+      {
+        "instance": 65536,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "type int32",
+    "schema": {
+      "type": "int32"
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": 3.14,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": -2147483649,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": -2147483648,
+        "errors": []
+      },
+      {
+        "instance": 2147483647,
+        "errors": []
+      },
+      {
+        "instance": 2147483648,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "type uint32",
+    "schema": {
+      "type": "uint32"
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": 3.14,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": -1,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": 0,
+        "errors": []
+      },
+      {
+        "instance": 4294967295,
+        "errors": []
+      },
+      {
+        "instance": 4294967296,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "type string",
+    "schema": {
+      "type": "string"
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": true,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": 3.14,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": 3,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": "foo",
+        "errors": []
+      },
+      {
+        "instance": "1937-01-01T12:00:27.87+00:20",
+        "errors": []
+      },
+      {
+        "instance": [],
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": {},
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "type timestamp",
+    "schema": {
+      "type": "timestamp"
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": true,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": 3.14,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": 3,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": "foo",
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": "1937-01-01T12:00:27.87+00:20",
+        "errors": []
+      },
+      {
+        "instance": [],
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      },
+      {
+        "instance": {},
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/type"
+          }
+        ]
+      }
+    ]
+  }
+]

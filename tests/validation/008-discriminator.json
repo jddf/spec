@@ -1,0 +1,340 @@
+[
+  {
+    "name": "strict discriminator",
+    "schema": {
+      "discriminator": {
+        "tag": "arrayOf",
+        "mapping": {
+          "strings": {
+            "properties": {
+              "values": {
+                "elements": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "booleans": {
+            "properties": {
+              "values": {
+                "elements": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/discriminator"
+          }
+        ]
+      },
+      {
+        "instance": {},
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/discriminator/tag"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "arrayOf": null
+        },
+        "errors": [
+          {
+            "instancePath": "/arrayOf",
+            "schemaPath": "/discriminator/tag"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "arrayOf": "other"
+        },
+        "errors": [
+          {
+            "instancePath": "/arrayOf",
+            "schemaPath": "/discriminator/mapping"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "arrayOf": "strings",
+          "values": [
+            "",
+            "",
+            ""
+          ]
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "arrayOf": "strings",
+          "values": [
+            true,
+            true,
+            true
+          ]
+        },
+        "errors": [
+          {
+            "instancePath": "/values/0",
+            "schemaPath": "/discriminator/mapping/strings/properties/values/elements/type"
+          },
+          {
+            "instancePath": "/values/1",
+            "schemaPath": "/discriminator/mapping/strings/properties/values/elements/type"
+          },
+          {
+            "instancePath": "/values/2",
+            "schemaPath": "/discriminator/mapping/strings/properties/values/elements/type"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "arrayOf": "strings",
+          "values": [
+            "",
+            "",
+            ""
+          ],
+          "extra": null
+        },
+        "errors": [
+          {
+            "instancePath": "/extra",
+            "schemaPath": "/discriminator/mapping/strings"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "arrayOf": "booleans",
+          "values": [
+            true,
+            true,
+            true
+          ]
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "arrayOf": "booleans",
+          "values": [
+            null,
+            null,
+            null
+          ]
+        },
+        "errors": [
+          {
+            "instancePath": "/values/0",
+            "schemaPath": "/discriminator/mapping/booleans/properties/values/elements/type"
+          },
+          {
+            "instancePath": "/values/1",
+            "schemaPath": "/discriminator/mapping/booleans/properties/values/elements/type"
+          },
+          {
+            "instancePath": "/values/2",
+            "schemaPath": "/discriminator/mapping/booleans/properties/values/elements/type"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "arrayOf": "booleans",
+          "values": [
+            true,
+            true,
+            true
+          ],
+          "extra": true
+        },
+        "errors": [
+          {
+            "instancePath": "/extra",
+            "schemaPath": "/discriminator/mapping/booleans"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "non-strict discriminator",
+    "schema": {
+      "discriminator": {
+        "tag": "arrayOf",
+        "mapping": {
+          "strings": {
+            "properties": {
+              "values": {
+                "elements": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "booleans": {
+            "properties": {
+              "values": {
+                "elements": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/discriminator"
+          }
+        ]
+      },
+      {
+        "instance": {},
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/discriminator/tag"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "arrayOf": null
+        },
+        "errors": [
+          {
+            "instancePath": "/arrayOf",
+            "schemaPath": "/discriminator/tag"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "arrayOf": "other"
+        },
+        "errors": [
+          {
+            "instancePath": "/arrayOf",
+            "schemaPath": "/discriminator/mapping"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "arrayOf": "strings",
+          "values": [
+            "",
+            "",
+            ""
+          ]
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "arrayOf": "strings",
+          "values": [
+            true,
+            true,
+            true
+          ]
+        },
+        "errors": [
+          {
+            "instancePath": "/values/0",
+            "schemaPath": "/discriminator/mapping/strings/properties/values/elements/type"
+          },
+          {
+            "instancePath": "/values/1",
+            "schemaPath": "/discriminator/mapping/strings/properties/values/elements/type"
+          },
+          {
+            "instancePath": "/values/2",
+            "schemaPath": "/discriminator/mapping/strings/properties/values/elements/type"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "arrayOf": "strings",
+          "values": [
+            "",
+            "",
+            ""
+          ],
+          "extra": null
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "arrayOf": "booleans",
+          "values": [
+            true,
+            true,
+            true
+          ]
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "arrayOf": "booleans",
+          "values": [
+            null,
+            null,
+            null
+          ]
+        },
+        "errors": [
+          {
+            "instancePath": "/values/0",
+            "schemaPath": "/discriminator/mapping/booleans/properties/values/elements/type"
+          },
+          {
+            "instancePath": "/values/1",
+            "schemaPath": "/discriminator/mapping/booleans/properties/values/elements/type"
+          },
+          {
+            "instancePath": "/values/2",
+            "schemaPath": "/discriminator/mapping/booleans/properties/values/elements/type"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "arrayOf": "booleans",
+          "values": [
+            true,
+            true,
+            true
+          ],
+          "extra": true
+        },
+        "errors": []
+      }
+    ]
+  }
+]

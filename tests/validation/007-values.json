@@ -1,0 +1,47 @@
+[
+  {
+    "name": "values must be string",
+    "schema": {
+      "values": {
+        "type": "string"
+      }
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/values"
+          }
+        ]
+      },
+      {
+        "instance": {},
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": ""
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": null,
+          "bar": null
+        },
+        "errors": [
+          {
+            "instancePath": "/foo",
+            "schemaPath": "/values/type"
+          },
+          {
+            "instancePath": "/bar",
+            "schemaPath": "/values/type"
+          }
+        ]
+      }
+    ]
+  }
+]

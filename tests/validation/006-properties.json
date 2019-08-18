@@ -1,0 +1,573 @@
+[
+  {
+    "name": "strict properties",
+    "schema": {
+      "properties": {
+        "foo": {
+          "type": "string"
+        },
+        "bar": {
+          "type": "boolean"
+        }
+      }
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/properties"
+          }
+        ]
+      },
+      {
+        "instance": {},
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/properties/foo"
+          },
+          {
+            "instancePath": "",
+            "schemaPath": "/properties/bar"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "foo": ""
+        },
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/properties/bar"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "foo": "",
+          "bar": true
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": "",
+          "bar": true,
+          "baz": 123
+        },
+        "errors": [
+          {
+            "instancePath": "/baz",
+            "schemaPath": ""
+          }
+        ]
+      },
+      {
+        "instance": {
+          "foo": null,
+          "bar": true
+        },
+        "errors": [
+          {
+            "instancePath": "/foo",
+            "schemaPath": "/properties/foo/type"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "foo": null,
+          "bar": "bar"
+        },
+        "errors": [
+          {
+            "instancePath": "/bar",
+            "schemaPath": "/properties/bar/type"
+          },
+          {
+            "instancePath": "/foo",
+            "schemaPath": "/properties/foo/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "non-strict properties",
+    "schema": {
+      "additionalProperties": true,
+      "properties": {
+        "foo": {
+          "type": "string"
+        },
+        "bar": {
+          "type": "boolean"
+        }
+      }
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/properties"
+          }
+        ]
+      },
+      {
+        "instance": {},
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/properties/foo"
+          },
+          {
+            "instancePath": "",
+            "schemaPath": "/properties/bar"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "foo": ""
+        },
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/properties/bar"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "foo": "",
+          "bar": true
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": "",
+          "bar": true,
+          "baz": 123
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": null,
+          "bar": true
+        },
+        "errors": [
+          {
+            "instancePath": "/foo",
+            "schemaPath": "/properties/foo/type"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "foo": null,
+          "bar": "bar"
+        },
+        "errors": [
+          {
+            "instancePath": "/bar",
+            "schemaPath": "/properties/bar/type"
+          },
+          {
+            "instancePath": "/foo",
+            "schemaPath": "/properties/foo/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "strict optionalProperties",
+    "schema": {
+      "optionalProperties": {
+        "foo": {
+          "type": "string"
+        },
+        "bar": {
+          "type": "boolean"
+        }
+      }
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/optionalProperties"
+          }
+        ]
+      },
+      {
+        "instance": {},
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": ""
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": "",
+          "bar": true
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": null,
+          "bar": true
+        },
+        "errors": [
+          {
+            "instancePath": "/foo",
+            "schemaPath": "/optionalProperties/foo/type"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "foo": null,
+          "bar": "bar"
+        },
+        "errors": [
+          {
+            "instancePath": "/bar",
+            "schemaPath": "/optionalProperties/bar/type"
+          },
+          {
+            "instancePath": "/foo",
+            "schemaPath": "/optionalProperties/foo/type"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "foo": "",
+          "bar": true,
+          "baz": 123
+        },
+        "errors": [
+          {
+            "instancePath": "/baz",
+            "schemaPath": ""
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "non-strict optionalProperties",
+    "schema": {
+      "additionalProperties": true,
+      "optionalProperties": {
+        "foo": {
+          "type": "string"
+        },
+        "bar": {
+          "type": "boolean"
+        }
+      }
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/optionalProperties"
+          }
+        ]
+      },
+      {
+        "instance": {},
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": ""
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": "",
+          "bar": true
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": null,
+          "bar": true
+        },
+        "errors": [
+          {
+            "instancePath": "/foo",
+            "schemaPath": "/optionalProperties/foo/type"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "foo": null,
+          "bar": "bar"
+        },
+        "errors": [
+          {
+            "instancePath": "/bar",
+            "schemaPath": "/optionalProperties/bar/type"
+          },
+          {
+            "instancePath": "/foo",
+            "schemaPath": "/optionalProperties/foo/type"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "foo": "",
+          "bar": true,
+          "baz": 123
+        },
+        "errors": []
+      }
+    ]
+  },
+  {
+    "name": "strict mixed properties and optionalProperties",
+    "schema": {
+      "properties": {
+        "foo": {
+          "type": "string"
+        }
+      },
+      "optionalProperties": {
+        "bar": {
+          "type": "boolean"
+        }
+      }
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/properties"
+          }
+        ]
+      },
+      {
+        "instance": {},
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/properties/foo"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "foo": ""
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": "",
+          "bar": true
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": "",
+          "bar": true,
+          "baz": 123
+        },
+        "errors": [
+          {
+            "instancePath": "/baz",
+            "schemaPath": ""
+          }
+        ]
+      },
+      {
+        "instance": {
+          "foo": null,
+          "bar": true
+        },
+        "errors": [
+          {
+            "instancePath": "/foo",
+            "schemaPath": "/properties/foo/type"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "foo": null,
+          "bar": "bar"
+        },
+        "errors": [
+          {
+            "instancePath": "/bar",
+            "schemaPath": "/optionalProperties/bar/type"
+          },
+          {
+            "instancePath": "/foo",
+            "schemaPath": "/properties/foo/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "non-strict mixed properties and optionalProperties",
+    "schema": {
+      "additionalProperties": true,
+      "properties": {
+        "foo": {
+          "type": "string"
+        }
+      },
+      "optionalProperties": {
+        "bar": {
+          "type": "boolean"
+        }
+      }
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/properties"
+          }
+        ]
+      },
+      {
+        "instance": {},
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/properties/foo"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "foo": ""
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": "",
+          "bar": true
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": "",
+          "bar": true,
+          "baz": 123
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": null,
+          "bar": true
+        },
+        "errors": [
+          {
+            "instancePath": "/foo",
+            "schemaPath": "/properties/foo/type"
+          }
+        ]
+      },
+      {
+        "instance": {
+          "foo": null,
+          "bar": "bar"
+        },
+        "errors": [
+          {
+            "instancePath": "/bar",
+            "schemaPath": "/optionalProperties/bar/type"
+          },
+          {
+            "instancePath": "/foo",
+            "schemaPath": "/properties/foo/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "mixed strict and non-strict",
+    "schema": {
+      "additionalProperties": false,
+      "properties": {
+        "foo": {
+          "additionalProperties": true,
+          "properties": {
+            "bar": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "instances": [
+      {
+        "instance": {
+          "foo": {
+            "bar": "baz"
+          }
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": {
+            "bar": "baz",
+            "quux": "asdf"
+          }
+        },
+        "errors": []
+      },
+      {
+        "instance": {
+          "foo": {
+            "bar": "baz"
+          },
+          "quux": "asdf"
+        },
+        "errors": [
+          {
+            "instancePath": "/quux",
+            "schemaPath": ""
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,364 @@
+[
+  {
+    "name": "null schema",
+    "schema": null
+  },
+  {
+    "name": "boolean schema",
+    "schema": true
+  },
+  {
+    "name": "number schema",
+    "schema": 3.14
+  },
+  {
+    "name": "string schema",
+    "schema": "foo"
+  },
+  {
+    "name": "array schema",
+    "schema": []
+  },
+  {
+    "name": "definitions not an object",
+    "schema": {
+      "definitions": "foo"
+    }
+  },
+  {
+    "name": "definition not an object",
+    "schema": {
+      "definitions": {
+        "foo": "foo"
+      }
+    }
+  },
+  {
+    "name": "definition not a schema",
+    "schema": {
+      "definitions": {
+        "foo": {
+          "type": "foo"
+        }
+      }
+    }
+  },
+  {
+    "name": "additionalProperties not a boolean",
+    "schema": {
+      "additionalProperties": "foo"
+    }
+  },
+  {
+    "name": "ref not a string",
+    "schema": {
+      "ref": 3.14
+    }
+  },
+  {
+    "name": "ref but no definitions",
+    "schema": {
+      "ref": "foo"
+    }
+  },
+  {
+    "name": "ref to non-existent definition",
+    "schema": {
+      "definitions": {},
+      "ref": "foo"
+    }
+  },
+  {
+    "name": "ref to non-existent root definition",
+    "schema": {
+      "definitions": {},
+      "elements": {
+        "definitions": {
+          "foo": {}
+        },
+        "ref": "foo"
+      }
+    }
+  },
+  {
+    "name": "type not a string",
+    "schema": {
+      "type": 3.14
+    }
+  },
+  {
+    "name": "type not a pre-defined value",
+    "schema": {
+      "type": "foo"
+    }
+  },
+  {
+    "name": "enum not an array",
+    "schema": {
+      "enum": 3.14
+    }
+  },
+  {
+    "name": "enum empty array",
+    "schema": {
+      "enum": []
+    }
+  },
+  {
+    "name": "enum not an array of strings",
+    "schema": {
+      "enum": [
+        3.14
+      ]
+    }
+  },
+  {
+    "name": "enum contains repated values",
+    "schema": {
+      "enum": [
+        "foo",
+        "foo"
+      ]
+    }
+  },
+  {
+    "name": "elements not an object",
+    "schema": {
+      "elements": 3.14
+    }
+  },
+  {
+    "name": "elements not a schema",
+    "schema": {
+      "elements": {
+        "type": "foo"
+      }
+    }
+  },
+  {
+    "name": "properties not an object",
+    "schema": {
+      "properties": 3.14
+    }
+  },
+  {
+    "name": "optionalProperties not an object",
+    "schema": {
+      "optionalProperties": 3.14
+    }
+  },
+  {
+    "name": "property not a schema",
+    "schema": {
+      "properties": {
+        "foo": {
+          "type": "foo"
+        }
+      }
+    }
+  },
+  {
+    "name": "optional property not a schema",
+    "schema": {
+      "optionalProperties": {
+        "foo": {
+          "type": "foo"
+        }
+      }
+    }
+  },
+  {
+    "name": "properties and optionalProperties share key",
+    "schema": {
+      "properties": {
+        "foo": {}
+      },
+      "optionalProperties": {
+        "foo": {}
+      }
+    }
+  },
+  {
+    "name": "values is not an object",
+    "schema": {
+      "values": 3.14
+    }
+  },
+  {
+    "name": "values is not a schema",
+    "schema": {
+      "values": {
+        "type": "foo"
+      }
+    }
+  },
+  {
+    "name": "discriminator is not an object",
+    "schema": {
+      "discriminator": 3.14
+    }
+  },
+  {
+    "name": "discriminator has no tag",
+    "schema": {
+      "discriminator": {
+        "mapping": {}
+      }
+    }
+  },
+  {
+    "name": "discriminator has no mapping",
+    "schema": {
+      "discriminator": {
+        "tag": "foo"
+      }
+    }
+  },
+  {
+    "name": "discriminator tag is not a string",
+    "schema": {
+      "discriminator": {
+        "tag": 3.14,
+        "mapping": {}
+      }
+    }
+  },
+  {
+    "name": "discriminator mapping is not an object",
+    "schema": {
+      "discriminator": {
+        "tag": "foo",
+        "mapping": 3.14
+      }
+    }
+  },
+  {
+    "name": "discriminator mapping value is not an object",
+    "schema": {
+      "discriminator": {
+        "tag": "foo",
+        "mapping": {
+          "foo": "foo"
+        }
+      }
+    }
+  },
+  {
+    "name": "discriminator mapping value is not a schema",
+    "schema": {
+      "discriminator": {
+        "tag": "foo",
+        "mapping": {
+          "foo": {
+            "properties": {
+              "bar": {}
+            },
+            "optionalProperties": {
+              "bar": {}
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "discriminator mapping value is not of properties form",
+    "schema": {
+      "discriminator": {
+        "tag": "foo",
+        "mapping": {
+          "foo": {}
+        }
+      }
+    }
+  },
+  {
+    "name": "discriminator mapping value has a property equal to tag's value",
+    "schema": {
+      "discriminator": {
+        "tag": "foo",
+        "mapping": {
+          "foo": {
+            "properties": {
+              "foo": {}
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "discriminator mapping value has an optional property equal to tag's value",
+    "schema": {
+      "discriminator": {
+        "tag": "foo",
+        "mapping": {
+          "foo": {
+            "optionalProperties": {
+              "foo": {}
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "schema both ref and type",
+    "schema": {
+      "definitions": {
+        "foo": {}
+      },
+      "ref": "foo",
+      "type": "number"
+    }
+  },
+  {
+    "name": "schema both type and enum",
+    "schema": {
+      "type": "number",
+      "enum": [
+        "foo"
+      ]
+    }
+  },
+  {
+    "name": "schema both enum and elements",
+    "schema": {
+      "enum": [
+        "foo"
+      ],
+      "elements": {}
+    }
+  },
+  {
+    "name": "schema both elements and properties",
+    "schema": {
+      "elements": {},
+      "properties": {}
+    }
+  },
+  {
+    "name": "schema both elements and properties via optionalProperties",
+    "schema": {
+      "elements": {},
+      "optionalProperties": {}
+    }
+  },
+  {
+    "name": "schema both properties and values",
+    "schema": {
+      "properties": {},
+      "values": {}
+    }
+  },
+  {
+    "name": "schema both values and discriminator",
+    "schema": {
+      "values": {},
+      "discriminator": {
+        "tag": "foo",
+        "mapping": {}
+      }
+    }
+  }
+]

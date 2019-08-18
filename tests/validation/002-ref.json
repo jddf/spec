@@ -1,0 +1,110 @@
+[
+  {
+    "name": "simple ref",
+    "schema": {
+      "definitions": {
+        "a": {
+          "type": "string"
+        }
+      },
+      "ref": "a"
+    },
+    "instances": [
+      {
+        "instance": "",
+        "errors": []
+      },
+      {
+        "instance": true,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/definitions/a/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "nested refs",
+    "schema": {
+      "definitions": {
+        "a": {
+          "ref": "b"
+        },
+        "b": {
+          "type": "string"
+        }
+      },
+      "ref": "a"
+    },
+    "instances": [
+      {
+        "instance": "",
+        "errors": []
+      },
+      {
+        "instance": true,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/definitions/b/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "recursive schema",
+    "schema": {
+      "definitions": {
+        "root": {
+          "elements": {
+            "ref": "root"
+          }
+        }
+      },
+      "ref": "root"
+    },
+    "instances": [
+      {
+        "instance": [],
+        "errors": []
+      },
+      {
+        "instance": [
+          [],
+          "a"
+        ],
+        "errors": [
+          {
+            "instancePath": "/1",
+            "schemaPath": "/definitions/root/elements"
+          }
+        ]
+      },
+      {
+        "instance": [
+          [],
+          [
+            []
+          ],
+          [
+            [
+              [],
+              [
+                "a"
+              ]
+            ]
+          ]
+        ],
+        "errors": [
+          {
+            "instancePath": "/2/0/1/0",
+            "schemaPath": "/definitions/root/elements"
+          }
+        ]
+      }
+    ]
+  }
+]

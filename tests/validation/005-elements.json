@@ -1,0 +1,120 @@
+[
+  {
+    "name": "elements of type string",
+    "schema": {
+      "elements": {
+        "type": "string"
+      }
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/elements"
+          }
+        ]
+      },
+      {
+        "instance": [],
+        "errors": []
+      },
+      {
+        "instance": [
+          "",
+          "",
+          ""
+        ],
+        "errors": []
+      },
+      {
+        "instance": [
+          "",
+          null,
+          3.14
+        ],
+        "errors": [
+          {
+            "instancePath": "/1",
+            "schemaPath": "/elements/type"
+          },
+          {
+            "instancePath": "/2",
+            "schemaPath": "/elements/type"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "elements of elements of type string",
+    "schema": {
+      "elements": {
+        "elements": {
+          "type": "string"
+        }
+      }
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/elements"
+          }
+        ]
+      },
+      {
+        "instance": [],
+        "errors": []
+      },
+      {
+        "instance": [
+          [],
+          [],
+          []
+        ],
+        "errors": []
+      },
+      {
+        "instance": [
+          [
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            null,
+            3.14
+          ],
+          [
+            "",
+            null,
+            3.14
+          ]
+        ],
+        "errors": [
+          {
+            "instancePath": "/1/1",
+            "schemaPath": "/elements/elements/type"
+          },
+          {
+            "instancePath": "/1/2",
+            "schemaPath": "/elements/elements/type"
+          },
+          {
+            "instancePath": "/2/1",
+            "schemaPath": "/elements/elements/type"
+          },
+          {
+            "instancePath": "/2/2",
+            "schemaPath": "/elements/elements/type"
+          }
+        ]
+      }
+    ]
+  }
+]

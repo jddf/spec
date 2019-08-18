@@ -1,0 +1,57 @@
+[
+  {
+    "name": "enum",
+    "schema": {
+      "enum": [
+        "FOO",
+        "BAR"
+      ]
+    },
+    "instances": [
+      {
+        "instance": null,
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/enum"
+          }
+        ]
+      },
+      {
+        "instance": "",
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/enum"
+          }
+        ]
+      },
+      {
+        "instance": "FOO",
+        "errors": []
+      },
+      {
+        "instance": "BAR",
+        "errors": []
+      },
+      {
+        "instance": "foo",
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/enum"
+          }
+        ]
+      },
+      {
+        "instance": "bar",
+        "errors": [
+          {
+            "instancePath": "",
+            "schemaPath": "/enum"
+          }
+        ]
+      }
+    ]
+  }
+]
