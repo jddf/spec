@@ -1,7 +1,7 @@
 ---
 title: JSON Data Definition Format (JDDF)
 docname: draft-ucarion-jddf-00
-date: 2019-08-14
+date: 2019-08-22
 ipr: trust200902
 area: Applications
 wg: Independent Submission
@@ -26,6 +26,7 @@ normative:
 informative:
   RFC7071:
   RFC7493:
+  I-D.handrews-json-schema:
 
 --- abstract
 
@@ -37,8 +38,14 @@ ill-formed data. JDDF is designed to enable code generation from schemas.
 
 # Introduction
 
-This document describes a schema language for JSON {{RFC8259}} called JSON
-Data Definition Format (JDDF).
+This document describes a schema language for JSON {{RFC8259}} called JSON Data
+Definition Format (JDDF). The name JDDF is chosen to avoid confusion with "JSON
+Schema" from {{I-D.handrews-json-schema}}.
+
+There exist many options for describing JSON data. JDDF's niche is to focus on
+enabling code generation from schemas; to this end, JDDF's expressiveness is
+intentionally limited to be no more powerful than what can be expressed in the
+type systems of mainstream languages.
 
 The goals of JDDF are to:
 
@@ -50,7 +57,7 @@ The goals of JDDF are to:
 - Provide a single format that is readable and editable by both humans and
   machines, and which can be embedded within other JSON documents.
 
-- Enable code generation from schemas.
+- Enable code generation from JDDF schemas.
 
 - Provide a standardized format for errors when data does not conform with a
   schema.
@@ -82,8 +89,8 @@ in widespread use. Thus, JDDF supports:
 
 The principle of common patterns in JSON is why JDDF does not support 64-bit
 integers, as these are usually transmitted over JSON in a non-interoperable
-(i.e., not respecting the recommendations in Section 2.2 of {{RFC7493}}) or
-mutually inconsistent (e.g., using hexadecimal versus base64) ways.
+(i.e., ignoring the recommendations in Section 2.2 of {{RFC7493}}) or mutually
+inconsistent (e.g., using hexadecimal versus base64) ways.
 
 The principle of clear correspondence to common programming languages is why
 JDDF does not support, for example, a data type for numbers up to 2**53-1.
@@ -1315,7 +1322,7 @@ Corresponds to the CDDL rule:
 root = { a: "foo", b: number } / { a: "bar", b: tstr }
 ~~~
 
-# Examples
+# Examples {#examples}
 
 This appendix is not normative.
 
