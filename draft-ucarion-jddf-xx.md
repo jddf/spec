@@ -1,7 +1,7 @@
 ---
 title: JSON Data Definition Format (JDDF)
-docname: draft-ucarion-jddf-00
-date: 2019-08-22
+docname: draft-ucarion-jddf-01
+date: 2019-09-18
 ipr: trust200902
 area: Applications
 wg: Independent Submission
@@ -16,7 +16,13 @@ pi:
 author:
   - ins: U. Carion
     name: Ulysse Carion
-    email: ulyssecarion@gmail.com
+    org: Segment.io, Inc
+    abbrev: Segment
+    street: 100 California Street
+    city: San Francisco
+    code: 94111
+    country: United States of America
+    email: ulysse@segment.com
 
 normative:
   RFC3339:
@@ -27,6 +33,12 @@ informative:
   RFC7071:
   RFC7493:
   I-D.handrews-json-schema:
+  OPENAPI:
+    target: http://spec.openapis.org/oas/v3.0.2
+    title: OpenAPI Specification
+    author:
+      org: OpenAPI Initiative
+    date: 2019-10-08
 
 --- abstract
 
@@ -1367,10 +1379,15 @@ This can be compared against the equivalent example in Appendix H of
 # Acknowledgments
 {: numbered="no"}
 
-Thanks to Gary Court, Francis Galiegue, Kris Zyp, Geraint Luff, Jason
-Desrosiers, Daniel Perrett, Erik Wilde, Ben Hutton, Evgeny Poberezkin, Brad
-Bowman, Gowry Sankar, Donald Pipowitch, Dave Finlay, Denis Laxalde, Henry
-Andrews, and Austin Wright for their work on the initial drafts of JSON Schema,
-which inspired JSON Data Definition Format.
+Carsten Bormann provided lots of useful guidance and feedback on JDDF's design
+and the structure of this document.
 
-Thanks to Tim Bray, Carsten Bormann, and James Manger for their help.
+Tim Bray suggested the current `ref` model, and the addition of `enum`. Anders
+Rundgren suggested extending `type` to have more support for numerical types.
+James Manger suggested additional clarifying examples of how integer types work.
+Members of the IETF JSON mailing list -- in particular, Pete Cordell, Phillip
+Hallam-Baker, Nico Williams, John Cowan, Rob Sayre, and Erik Wilde -- provided
+lots of useful feedback.
+
+OpenAPI's `discriminator` object {{OPENAPI}} inspired the `discriminator` form.
+{{I-D.handrews-json-schema}} influenced various parts of JDDF's early design.
