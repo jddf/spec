@@ -1,7 +1,7 @@
 ---
 title: JSON Data Definition Format (JDDF)
-docname: draft-ucarion-jddf-02
-date: 2019-10-12
+docname: draft-ucarion-jddf-03
+date: 2019-10-13
 ipr: trust200902
 area: Applications
 wg: Independent Submission
@@ -906,26 +906,110 @@ but rejects
    10.5
 ~~~
 
+as well as
+
+~~~ json
+   false
+~~~
+
+because "false" is not a number at all.
+
 If the instance is not accepted, then the error indicator for this case shall
 have an `instancePath` pointing to the instance, and a `schemaPath` pointing to
 the schema member with the name `type`.
 
-{{type-examples}} provides examples of the sorts of values various `type`
-schemas will accept or reject:
+For example, the schema:
 
-|-----------------------+------------------------+------------------------|
-| JDDF Schema           | Example accepted value | Example rejected value |
-|-----------------------+------------------------+------------------------|
-| {"type": "boolean"}   | false                  | 127                    |
-| {"type": "float32"}   | 10.5                   | false                  |
-| {"type": "int8"}      | 127                    | false                  |
-| {"type": "string"}    | "foo"                  | false                  |
-| {"type": "timestamp"} | "1990-12-31T23:59:60Z" | false                  |
-|-----------------------+------------------------+------------------------|
-{: #type-examples title="Examples of the \"type\" form"}
+~~~ json
+   {"type": "boolean"}
+~~~
 
-In all of the rejected examples in {{type-examples}}, the error indicator to
-produce is:
+accepts
+
+~~~ json
+   false
+~~~
+
+but rejects
+
+~~~ json
+   127
+~~~
+
+The schema:
+
+~~~ json
+   {"type": "float32"}
+~~~
+
+accepts
+
+~~~ json
+   10.5
+~~~
+
+and
+
+~~~ json
+   127
+~~~
+
+but rejects
+
+~~~ json
+   false
+~~~
+
+The schema:
+
+~~~ json
+   {"type": "string"}
+~~~
+
+accepts
+
+~~~ json
+   "1985-04-12T23:20:50.52Z"
+~~~
+
+and
+
+~~~ json
+   "foo"
+~~~
+
+but rejects
+
+~~~ json
+   false
+~~~
+
+The schema:
+
+~~~ json
+   {"type": "timestamp"}
+~~~
+
+accepts
+
+~~~ json
+   "1985-04-12T23:20:50.52Z"
+~~~
+
+but rejects
+
+~~~ json
+   "foo"
+~~~
+
+and
+
+~~~ json
+   false
+~~~
+
+In all of the examples of rejected instances given in this section, the error
+indicator to produce is:
 
 ~~~ json
    [{ "instancePath": "", "schemaPath": "/type" }]
