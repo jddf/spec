@@ -1,12 +1,12 @@
 ---
 title: JSON Data Definition Format (JDDF)
-docname: draft-ucarion-jddf-01
-date: 2019-09-18
+docname: draft-ucarion-jddf-02
+date: 2019-10-12
 ipr: trust200902
 area: Applications
 wg: Independent Submission
 kw: Internet-Draft
-cat: info
+cat: exp
 
 pi:
   toc: yes
@@ -42,9 +42,16 @@ informative:
 
 --- abstract
 
-JSON Data Definition Format (JDDF) is a portable method for describing the
-format of JavaScript Object Notation (JSON) data and the errors associated with
-ill-formed data. JDDF is designed to enable code generation from schemas.
+This document proposes a format, called JSON Data Definition Format (JDDF), for
+describing the shape of JavaScript Object Notation (JSON) messages. Its main
+goals are to enable code generation from schemas as well as portable validation
+with standardized error indicators. To this end, JDDF is strategically limited
+to be no more expressive than the type systems of mainstream programming
+languages. This strategic limitation, as well as the decision to make JDDF
+schemas be JSON documents, also makes tooling atop of JDDF easier to build.
+
+This document does not have IETF consensus and is presented here to facilitate
+experimentation with the concept of JDDF.
 
 --- middle
 
@@ -56,29 +63,38 @@ Schema" from {{I-D.handrews-json-schema}}.
 
 There exist many options for describing JSON data. JDDF's niche is to focus on
 enabling code generation from schemas; to this end, JDDF's expressiveness is
-intentionally limited to be no more powerful than what can be expressed in the
-type systems of mainstream languages.
+strategically limited to be no more powerful than what can be expressed in the
+type systems of mainstream programming languages.
 
 The goals of JDDF are to:
 
 - Provide an unambiguous description of the overall structure of a JSON
   document.
 
-- Be able to describe common JSON datatypes and structures.
+- Be able to describe common JSON datatypes and structures. That is, the
+  datatypes and structures necessary to support most JSON documents, and which
+  are widely understood in an interoperable way by JSON implementations.
 
 - Provide a single format that is readable and editable by both humans and
-  machines, and which can be embedded within other JSON documents.
+  machines, and which can be embedded within other JSON documents. This makes
+  JDDF a convenient format for tooling to accept as input, or produce as output.
 
-- Enable code generation from JDDF schemas.
+- Enable code generation from JDDF schemas. JDDF schemas are meant to be easy to
+  convert into data structures idiomatic to a given mainstream programming
+  language.
 
 - Provide a standardized format for errors when data does not conform with a
   schema.
 
-JDDF is intentionally designed as a rather minimal schema language. For example,
-JDDF is homoiconic (it both describes, and is written in, JSON) yet is incapable
-of describing in detail its own structure. By keeping the expressiveness of the
-schema language minimal, JDDF makes code generation and standardized errors
-easier to implement.
+JDDF is intentionally designed as a rather minimal schema language. Thus,
+although JDDF can describe JSON, it is not able to describe its own structure:
+the Concise Data Definition Language (CDDL) {{RFC8610}} is used to describe JDDF
+in this document. By keeping the expressiveness of the schema language minimal,
+JDDF makes code generation and standardized errors easier to implement.
+
+Examples in this document use constructs from the C++ programming language.
+These examples are provided to aid the reader in understanding the principles of
+JDDF, but are not limiting in any way.
 
 JDDF's feature set is designed to represent common patterns in JSON-using
 applications, while still having a clear correspondence to programming languages
@@ -91,13 +107,16 @@ in widespread use. Thus, JDDF supports:
 - A distinction between `float32` and `float64`. Code generators can use `float`
   and `double`, or their equivalents, for these JDDF types.
 
-- A "properties" form of JSON objects, corresponding to some sort of struct.
+- A "properties" form of JSON objects, corresponding to some sort of struct or
+  record. The "properties" form of JSON objects is akin to a C++ `struct`.
 
 - A "values" form of JSON objects, corresponding to some sort of dictionary or
-  associative array.
+  associative array. The "values" form of JSON objects is akin to a C++
+  `std::map`.
 
 - A "discriminator" form of JSON objects, corresponding to a discriminated (or
-  "tagged") union.
+  "tagged") union. The "discriminator" form of JSON objects is akin to a C++
+  `std::variant`.
 
 The principle of common patterns in JSON is why JDDF does not support 64-bit
 integers, as these are usually transmitted over JSON in a non-interoperable
@@ -109,8 +128,13 @@ JDDF does not support, for example, a data type for numbers up to 2**53-1.
 
 It is expected that for many use-cases, a schema language of JDDF's
 expressiveness is sufficient. Where a more expressive language is required,
-alternatives exist in CDDL ({{RFC8610}}, Concise Data Definition Language) and
-others.
+alternatives exist in CDDL and others.
+
+This document does not have IETF consensus and is presented here to facilitate
+experimentation with the concept of JDDF. The purpose of the experiment is to
+gain experience with JDDF and to possibly revise this work accordingly.  If JDDF
+is determined to be a valuable and popular approach it may be taken to the IETF
+for further discussion and revision.
 
 This document has the following structure:
 
@@ -133,9 +157,38 @@ document are to be interpreted as described in {{RFC8259}}.
 The term "instance", when it appears in this document, refers to a JSON value
 being validated against a JDDF schema.
 
+## Scope of Experiment
+
+JDDF is an experiment. Participation in this experiment consists of using JDDF
+to validate or document interchanged JSON messages, or in building tooling atop
+of JDDF. Feedback on the results of this experiment may be e-mailed to the
+author.
+
+Nodes know if they are participating in the experiment if they are validating
+JSON messages against a JDDF schema, or if they are relying on another node to
+do so. Nodes are also participating in the experiment if they are running code
+generated from a JDDF schema.
+
+The risk of this experiment "escaping" takes the form of a JDDF-supporting node
+expecting another node, which lacks such support, to validate messages against
+some JDDF schema. In such a case, the outcome will likely be that the nodes fail
+to interchange information correctly.
+
+This experiment will be deemed successful when JDDF has been implemented by
+multiple independent parties, and these parties successfully use JDDF to
+facilitate information interchange within their internal systems or between
+systems operated by independent parties.
+
+If this experiment is deemed successful, and JDDF is determined to be a valuable
+and popular approach, it may be taken to the IETF for further discussion and
+revision. One possible outcome of this discussion and revision could be that a
+working group produces a Standards Track specification of JDDF.
+
 # Syntax {#syntax}
 
-This section describes when a JSON document is a correct JDDF schema.
+This section describes when a JSON document is a correct JDDF schema. Because
+CDDL is well-suited to the task of defining complex JSON formats, such as JDDF
+schemas, this section uses CDDL to describe the format of JDDF schemas.
 
 JDDF schemas may recursively contain other schemas. In this document, a "root
 schema" is one which is not contained within another schema, i.e. it is "top
@@ -168,21 +221,21 @@ non-keyword =
     .ne "values")
     .ne "discriminator"
 ~~~
-{: #cddl-schema title="CDDL Definition of a Schema"}
+{: #cddl-schema title="CDDL definition of a schema"}
 
-This is not a correct JDDF schema, as its `definitions` object contains a
-number, which is not a schema:
+Thus {{def-number}} is not a correct JDDF schema, as its `definitions` object
+contains a number, which is not a schema:
 
 ~~~ json
 { "definitions": { "foo": 3 }}
 ~~~
+{: #def-number title="An incorrect JDDF schema. JSON numbers are not JDDF
+schemas" }
 
-Here is an example of a valid schema using the `properties`, `type`, and `ref`
-forms, which will be described later in this section:
+{{ref-user}} is an example of a correct schema that uses `definitions`:
 
 ~~~ json
 {
-  "strict": false,
   "definitions": {
     "user": {
       "properties": {
@@ -196,6 +249,7 @@ forms, which will be described later in this section:
   }
 }
 ~~~
+{: #ref-user title="A correct JDDF schema using \"definitions\"" }
 
 JDDF schemas can take on one of eight forms. These forms are defined so as to be
 mutually exclusive; a schema cannot satisfy multiple forms at once.
@@ -210,28 +264,34 @@ form = empty /
   values /
   discriminator
 ~~~
-{: #cddl-form title="CDDL Definition of the Schema Forms"}
+{: #cddl-form title="CDDL definition of the JDDF schema forms"}
 
 The first form, `empty`, is trivial. It is meant for matching any instance:
 
 ~~~ cddl
 empty = {}
 ~~~
-{: #cddl-empty title="CDDL Definition of the Empty Form"}
+{: #cddl-empty title="CDDL definition of the \"empty\" form"}
 
-Thus, this is a correct schema:
+Thus, {{jddf-empty}} is a correct schema:
 
 ~~~ json
 {}
 ~~~
+{: #jddf-empty title="A JDDF schema of the \"empty\" form" }
 
-The second form, `ref`, is for when a schema is meant to be defined in terms of
-something in `definitions`:
+The empty form is not very useful by itself, and it meant to be used as a
+sub-schema. Schema authors can use the empty form to describe parts of a message
+format which do not contain predictable data, or which the author does not want
+to specify.
+
+The second form, `ref`, is for when a schema is defined in terms of something in
+the `definitions` of the root schema:
 
 ~~~ cddl
 ref = { ref: tstr }
 ~~~
-{: #cddl-ref title="CDDL Definition of the Ref Form"}
+{: #cddl-ref title="CDDL definition of the \"ref\" form"}
 
 For a schema to be correct, the `ref` value must refer to one of the definitions
 found at the root level of the schema it appears in. More formally, for a schema
@@ -244,8 +304,12 @@ found at the root level of the schema it appears in. More formally, for a schema
 If the schema is correct, then *B* must have a member *D* with the name
 `definitions`, and *D* must contain a member whose name equals *R*.
 
-Here is a correct example of `ref` being used to avoid re-defining the same
-thing twice:
+Note that, from this definition, `ref` can only refer to definitions at the root
+of the schema, and not to merely any definitions further up the tree. This
+limitation is deliberate, and aids in generating useful code from schemas.
+
+{{cddl-definitions}} is a correct example of `ref` being used to avoid
+re-defining the same thing twice:
 
 ~~~ json
 {
@@ -263,9 +327,10 @@ thing twice:
   }
 }
 ~~~
+{: #cddl-definitions title="A correct JDDF schema using the \"ref\" form" }
 
-However, this schema is incorrect, as it refers to a definition that doesn't
-exist:
+However, {{cddl-def-no-bar}} is incorrect, as it refers to a definition that
+doesn't exist:
 
 ~~~ json
 {
@@ -273,9 +338,11 @@ exist:
   "ref": "bar"
 }
 ~~~
+{: #cddl-def-no-bar title="An incorrect JDDF schema. There is no \"bar\" in
+\"definitions\"" }
 
-This schema is incorrect as well, as it refers to a definition that doesn't
-exist at the root level. The non-root definition is immaterial:
+{{cddl-def-no-root-bar}} is incorrect as well, as it refers to a definition that
+doesn't exist at the root level. The non-root definition is immaterial:
 
 ~~~ json
 {
@@ -286,6 +353,8 @@ exist at the root level. The non-root definition is immaterial:
   }
 }
 ~~~
+{: #cddl-def-no-root-bar title="An incorrect JDDF schema. There is no \"bar\" in
+the root-level \"definitions\"" }
 
 The third form, `type`, constrains instances to have a particular primitive
 type. The precise meaning of each of the primitive types is described in
@@ -298,12 +367,13 @@ num-type = "float32" / "float64" /
 ~~~
 {: #cddl-type title="CDDL Definition of the Type Form"}
 
-For example, this schema constrains instances to be strings that are correct
-{{RFC3339}} timestamps:
+For example, {{jddf-timestamp}} constrains instances to be strings that are
+correct {{RFC3339}} timestamps:
 
 ~~~ json
 { "type": "timestamp" }
 ~~~
+{: #jddf-timestamp title="A correct JDDF schema using the \"type\" form"}
 
 The fourth form, `enum`, describes instances whose value must be one of a
 finite, predetermined set of values:
@@ -311,20 +381,22 @@ finite, predetermined set of values:
 ~~~ cddl
 enum = { enum: [+ tstr] }
 ~~~
-{: #cddl-enum title="CDDL Definition of the Enum Form"}
+{: #cddl-enum title="CDDL definition of the \"enum\" form"}
 
-The values within `[+ tstr]` MUST NOT contain duplicates. Thus, the following is
+The values within `[+ tstr]` MUST NOT contain duplicates. Thus, {{jddf-enum}} is
 a correct schema:
 
 ~~~ json
 { "enum": ["IN_PROGRESS", "DONE", "CANCELED"] }
 ~~~
+{: #jddf-enum title="A correct JDDF schema using the \"enum\" form"}
 
-But this is not a correct schema, as `B` is duplicated:
+But {{jddf-enum-repeat}} is not a correct schema, as `B` is duplicated:
 
 ~~~ json
 { "enum": ["A", "B", "B"] }
 ~~~
+{: #jddf-enum-repeat title="An incorrect JDDF schema. \"B\" appears twice."}
 
 The fifth form, `elements`, describes instances that must be arrays. A further
 sub-schema describes the elements of the array.
@@ -332,13 +404,16 @@ sub-schema describes the elements of the array.
 ~~~ cddl
 elements = { elements: schema }
 ~~~
-{: #cddl-elements title="CDDL Definition of the Elements Form"}
+{: #cddl-elements title="CDDL definition of the \"elements\" form"}
 
-Here is a schema describing an array of {{RFC3339}} timestamps:
+{{jddf-elements-timestamp}} is a schema describing an array of {{RFC3339}}
+timestamps:
 
 ~~~ json
 { "elements": { "type": "timestamp" }}
 ~~~
+{: #jddf-elements-timestamp title="A correct JDDF schema using the \"elements\"
+form"}
 
 The sixth form, `properties`, describes JSON objects being used as a "struct". A
 schema of this form specifies the names of required and optional properties, as
@@ -359,15 +434,15 @@ with-optional-properties = {
   optionalProperties: * tstr => schema
 }
 ~~~
-{: #cddl-properties title="CDDL Definition of the Properties Form"}
+{: #cddl-properties title="CDDL definition of the \"properties\" form"}
 
 If a schema has both a member named `properties` (with value *P*) and another
 member named `optionalProperties` (with value *O*), then *O* and *P* MUST NOT
 have any member names in common. This is to prevent ambiguity as to whether a
 property is optional or required.
 
-Thus, this is not a correct schema, as `confusing` appears in both `properties`
-and `optionalProperties`:
+Thus, {{jddf-repeated-confusing}} is not a correct schema, as `confusing`
+appears in both `properties` and `optionalProperties`:
 
 ~~~ json
 {
@@ -375,8 +450,10 @@ and `optionalProperties`:
   "optionalProperties": { "confusing": {} }
 }
 ~~~
+{: #jddf-repeated-confusing title="An incorrect JDDF schema. \"confusing\" is
+repeated between \"properties\" and \"optionalProperties\""}
 
-Here is a correct schema, describing a paginated list of users:
+{{jddf-list-users}} is a correct schema, describing a paginated list of users:
 
 ~~~ json
 {
@@ -397,6 +474,7 @@ Here is a correct schema, describing a paginated list of users:
   }
 }
 ~~~
+{: #jddf-list-users title="A correct JDDF schema using the \"properties\" form"}
 
 The seventh form, `values`, describes JSON objects being used as an associative
 array. A schema of this form specifies the form all member values must satisfy,
@@ -405,13 +483,15 @@ but places no constraints on the member names:
 ~~~ cddl
 values = { values: * tstr => schema }
 ~~~
-{: #cddl-values title="CDDL Definition of the Values Form"}
+{: #cddl-values title="CDDL definition of the \"values\" form"}
 
-Thus, this is a correct schema, describing a mapping from strings to numbers:
+Thus, {{jddf-values-float32}} is a correct schema, describing a mapping from
+strings to numbers:
 
 ~~~ json
 { "values": { "type": "float32" }}
 ~~~
+{: #jddf-values-float32 title="A correct JDDF schema using the "values" form"}
 
 Finally, the eighth form, `discriminator`, describes JSON objects being used as
 a discriminated union. A schema of this form specifies the "tag" (or
@@ -422,7 +502,7 @@ appropriate schema to use.
 ; Note well: the values of mapping are of the properties form.
 discriminator = { tag: tstr, mapping: * tstr => properties }
 ~~~
-{: #cddl-discriminator title="CDDL Definition of the Discriminator Form"}
+{: #cddl-discriminator title="CDDL definition of the \"discriminator\" form"}
 
 To prevent ambiguous or unsatisfiable contstraints on the "tag" of a
 discriminator, an additional constraint on schemas of the discriminator form
@@ -437,8 +517,9 @@ the "properties" form. For each member *P* of *S* whose name equals `properties`
 or `optionalProperties`, *P*'s value, which must be an object, MUST NOT contain
 any members whose name equals *T*'s value.
 
-Thus, this is an incorrect schema, as "event_type" is both the value of `tag`
-and a member name in one of the `mapping` member `properties`:
+Thus, {{jddf-repeated-event-type}} is an incorrect schema, as "event_type" is
+both the value of `tag` and a member name in one of the `mapping` member
+`properties`:
 
 ~~~ json
 {
@@ -450,9 +531,11 @@ and a member name in one of the `mapping` member `properties`:
   }
 }
 ~~~
+{: #jddf-repeated-event-type title="An incorrect JDDF schema. \"event_type\"
+appears both in \"tag\" and in the \"properties\" of a \"mapping\" value"}
 
-However, this is a correct schema, describing a pattern of data common in
-JSON-based messaging systems:
+However, {{jddf-discriminator-message}} is a correct schema, describing a
+pattern of data common in JSON-based messaging systems:
 
 ~~~ json
 {
@@ -475,12 +558,14 @@ JSON-based messaging systems:
   }
 }
 ~~~
+{: #jddf-discriminator-message title="A correct JDDF schema using the
+\"discriminator\" form"}
 
-## Extending JDDF's syntax
+## Extending JDDF's Syntax
 
 This document does not describe any extension mechanisms for JDDF schema
 validation, which is described in {{semantics}}. However, schemas (through the
-`non-keyword` CDDL rule in {{syntax}) are defined to allow members whose names
+`non-keyword` CDDL rule in {{syntax}} are defined to allow members whose names
 are not equal to any of the specially-defined keywords (i.e. `definitions`,
 `elements`, etc.). Call these members "non-keyword members".
 
@@ -494,41 +579,65 @@ As a result, if consistent validation with other parties is a requirement, users
 SHOULD NOT use non-keyword members to affect how schema validation, as described
 in {{semantics}}, works.
 
+Users MAY expect expect non-keywords to be understood by other parties, and MAY
+use non-keyword members to affect how schema validation works, if these other
+parties are somehow known to support these non-keyword members. For example, two
+parties may agree, out of band, that they will support an extended JDDF with a
+custom keyword.
+
 # Semantics {#semantics}
 
 This section describes when an instance is valid against a correct JDDF schema,
-and the standardized errors to produce when an instance is invalid.
+and the error indicators to produce when an instance is invalid.
 
-## Allowing additional properties {#allow-additional-properties}
+## Allowing Additional Properties {#allow-additional-properties}
 
 Users will have different desired behavior with respect to "unspcecified"
-members in an instance. For example:
+members in an instance. For example, consider the JDDF schema in
+{{jddf-properties-a}}:
 
 ~~~ json
 { "properties": { "a": { "type": "string" }}}
 ~~~
+{: #jddf-properties-a title="An illustrative JDDF schema"}
 
-Some users may expect that {"a": "foo", "b": "bar"} satisfies the above schema.
-Others may disagree, as `b` is not one of the properties described in the
-schema. In this document, allowing such "unspecified" members happens when
-evaluation is in "allow additional properties" mode.
+Some users may expect that
+
+~~~ json
+   {"a": "foo", "b": "bar"}
+~~~
+
+satisfies the schema in {{jddf-properties-a}}. Others may disagree, as `b` is
+not one of the properties described in the schema. In this document, allowing
+such "unspecified" members, like `b` in this example, happens when evaluation is
+in "allow additional properties" mode.
 
 Evaluation of a schema does not allow additional properties by default, but can
-be overridden by setting `additionalProperties: true` on the schema.
+be overridden by having the schema include a member named
+`additionalProperties`, where that member has a value of `true`.
 
-More formally, evaluation of a schema *S* is in "allow additional properties"
+More formally: evaluation of a schema *S* is in "allow additional properties"
 mode if there exists a member of *S* whose name equals `additionalProperties`,
 and whose value is a boolean `true`. Otherwise, evaluation of *S* is not in
 "allow additional properties" mode.
 
 See {{semantics-form-props}} for how allowing unknown properties affects schema
-evaluation, but briefly, the following schema:
+evaluation, but briefly, consider the schema in
+{{jddf-properties-a-no-additional}}:
 
 ~~~ json
 { "properties": { "a": { "type": "string" }}}
 ~~~
+{: #jddf-properties-a-no-additional title="A JDDF schema that does not allow
+additional properties"}
 
-Rejects {"a": "foo", "b": "bar"}, but the schema:
+The schema in {{jddf-properties-a-no-additional}} rejects
+
+~~~json
+   {"a": "foo", "b": "bar"}
+~~~
+
+However, consider the schema in {{jddf-properties-a-yes-additional}}:
 
 ~~~ json
 {
@@ -536,39 +645,52 @@ Rejects {"a": "foo", "b": "bar"}, but the schema:
   "properties": { "a": { "type": "string" }}
 }
 ~~~
+{: #jddf-properties-a-yes-additional title="A JDDF schema that allows additional
+properties"}
 
-Accepts {"a": "foo", "b": "bar"}.
-
-Note that `additionalProperties` does not get "inherited" by sub-schemas. For
-example, this schema:
+The schema in {{jddf-properties-a-yes-additional}} accepts
 
 ~~~ json
-{
-  "additionalProperties": true,
-  "elements": {
-    "properties": {
-      "a": { "type": "string" }
-    }
-  }
-}
+   {"a": "foo", "b": "bar"}.
 ~~~
 
-Rejects \[{"a": "foo", "b": "bar"}\]. The `additionalProperties` at the root
-level does not affect the behavior of the sub-schema within `elements`.
+Note that `additionalProperties` does not get "inherited" by sub-schemas. For
+example, the JDDF schema:
+
+~~~ json
+   {
+     "additionalProperties": true,
+     "elements": {
+       "properties": {
+         "a": { "type": "string" }
+       }
+     }
+   }
+~~~
+
+rejects
+
+~~~ json
+   [{"a": "foo", "b": "bar"}]
+~~~
+
+because the `additionalProperties` at the root level does not affect the
+behavior of the sub-schema within `elements`.
 
 ## Errors
 
 To facilitate consistent validation error handling, this document specifies a
-standard error format. Implementations SHOULD support producing errors in this
-standard form.
+standard error indicator format. Implementations SHOULD support producing error
+indicators in this standard form.
 
-The standard error format is a JSON array. The order of the elements of this
-array is not specified. The elements of this array are JSON objects with two
-members:
+The standard error indicator format is a JSON array. The order of the elements
+of this array is not specified. The elements of this array are JSON objects with
+the members:
 
 - A member with the name `instancePath`, whose value is a JSON string encoding a
   JSON Pointer. This JSON Pointer will point to the part of the instance that
   was rejected.
+
 - A member with the name `schemaPath`, whose value is a JSON string encoding a
   JSON Pointer. This JSON Pointer will point to the part of the schema that
   rejected the instance.
@@ -579,7 +701,7 @@ and are described in detail in {{semantics-forms}}.
 ## Forms {#semantics-forms}
 
 This section describes, for each of the eight JDDF schema forms, the rules
-dictating whether an instance is accepted, as well as the standardized errors to
+dictating whether an instance is accepted, as well as the error indicators to
 produce when an instance is invalid.
 
 The forms a correct schema may take on are formally described in {{syntax}}.
@@ -590,12 +712,12 @@ The empty form is meant to describe instances whose values are unknown,
 unpredictable, or otherwise unconstrained by the schema.
 
 If a schema is of the empty form, then it accepts all instances. A schema of the
-empty form will never produce any errors.
+empty form will never produce any error indicators.
 
 ### Ref
 
-The ref form is for when a schema is meant to be defined in terms of something
-in the `definitions` of the root schema. The ref form enables schemas to be less
+The ref form is for when a schema is defined in terms of something in the
+`definitions` of the root schema. The ref form enables schemas to be less
 repetitive, and also enables describing recursive structures.
 
 If a schema is of the ref form, then:
@@ -609,8 +731,8 @@ If a schema is of the ref form, then:
   {{syntax}}, *S* exists, and is a schema.
 
 The schema accepts the instance if and only if *S* accepts the instance.
-Otherwise, the standard errors to return in this case are the union of the
-errors from evaluating *S* against the instance.
+Otherwise, the error indicators to return in this case are the union of the
+error indicators from evaluating *S* against the instance.
 
 For example, the schema:
 
@@ -620,32 +742,61 @@ For example, the schema:
   "ref": "a"
 }
 ~~~
+{: #jddf-example-ref-1 title="A JDDF schema demonstrating the \"ref\" form"}
 
-Accepts 123 but not false. The standard errors to produce when evaluting false
-against this schema are:
+Accepts
 
 ~~~ json
-[{ "instancePath": "", "schemaPath": "/definitions/a/type" }]
+   123
+~~~
+
+but not
+
+~~~ json
+   false
+~~~
+
+The error indicators to produce when evaluting
+
+~~~ json
+   false
+~~~
+
+against the schema in {{jddf-example-ref-1}} are:
+
+~~~ json
+   [{ "instancePath": "", "schemaPath": "/definitions/a/type" }]
 ~~~
 
 Note that the ref form is defined to only look up definitions at the root level.
 Thus, with the schema:
 
 ~~~ json
-{
-  "definitions": { "a": { "type": "float32" }},
-  "elements": {
-    "definitions": { "a": { "type": "boolean" }},
-    "ref": "foo"
-  }
-}
+   {
+     "definitions": { "a": { "type": "float32" }},
+     "elements": {
+       "definitions": { "a": { "type": "boolean" }},
+       "ref": "a"
+     }
+   }
 ~~~
 
-The instance 123 is accepted, and false is rejected. The standard errors to
-produce when evaluating false against this schema are:
+The instance
 
 ~~~ json
-[{ "instancePath": "", "schemaPath": "/definitions/a/type" }]
+   123
+~~~
+
+is accepted, and
+
+~~~ json
+   false
+~~~
+
+is rejected, and the error indicator would be:
+
+~~~ json
+   [{ "instancePath": "", "schemaPath": "/definitions/a/type" }]
 ~~~
 
 Though non-root definitions are not syntactically disallowed in correct schemas,
@@ -701,28 +852,83 @@ range:
 |--------+----------------------------+----------------------------|
 {: #int-ranges title="Ranges for Integer Types"}
 
-Note that 10, 10.0, and 1.0e1 encode values with zero fractional part. 10.5
-encodes a number with a non-zero fractional part. Thus {"type": "int8"} accepts
-10, 10.0, and 1.0e1, but not 10.5.
+Note that
 
-If the instance is not accepted, then the standard error for this case shall
+~~~ json
+   10
+~~~
+
+and
+
+~~~ json
+   10.0
+~~~
+
+and
+
+~~~ json
+   1.0e1
+~~~
+
+encode values with zero fractional part, whereas
+
+~~~ json
+   10.5
+~~~
+
+encodes a number with a non-zero fractional part. Thus the schema
+
+~~~ json
+   {"type": "int8"}
+~~~
+
+accepts
+
+~~~ json
+   10
+~~~
+
+and
+
+~~~ json
+   10.0
+~~~
+
+and
+
+~~~ json
+   1.0e1
+~~~
+
+but rejects
+
+~~~ json
+   10.5
+~~~
+
+If the instance is not accepted, then the error indicator for this case shall
 have an `instancePath` pointing to the instance, and a `schemaPath` pointing to
 the schema member with the name `type`.
 
-For example:
+{{type-examples}} provides examples of the sorts of values various `type`
+schemas will accept or reject:
 
-- The schema {"type": "boolean"} accepts false, but rejects 127.
-- The schema {"type": "float32"} accepts 10.5, 127 and 128, but rejects false.
-- The schema {"type": "int8"} accepts 127, but rejects 10.5, 128 and false.
-- The schema {"type": "string"} accepts "1985-04-12T23:20:50.52Z" and "foo", but
-  rejects 127.
-- The schema {"type": "timestamp"} accepts "1985-04-12T23:20:50.52Z", but
-  rejects "foo" and 127.
+|-----------------------+------------------------+------------------------|
+| JDDF Schema           | Example accepted value | Example rejected value |
+|-----------------------+------------------------+------------------------|
+| {"type": "boolean"}   | false                  | 127                    |
+| {"type": "float32"}   | 10.5                   | false                  |
+| {"type": "int8"}      | 127                    | false                  |
+| {"type": "string"}    | "foo"                  | false                  |
+| {"type": "timestamp"} | "1990-12-31T23:59:60Z" | false                  |
+|-----------------------+------------------------+------------------------|
+{: #type-examples title="Examples of the \"type\" form"}
 
-In all of the rejected examples just given, the standard error to produce is:
+In all of the rejected examples in {{type-examples}}, the error indicator to
+produce is:
 
 ~~~ json
-[{ "instancePath": "", "schemaPath": "/type" }]
+   [{ "instancePath": "", "schemaPath": "/type" }]
 ~~~
 
 ### Enum
@@ -734,21 +940,62 @@ If a schema is of the enum form, then let *E* be the value of the schema member
 with the name `enum`. The instance is accepted if and only if it is equal to one
 of the elements of *E*.
 
-If the instance is not accepted, then the standard error for this case shall
+If the instance is not accepted, then the error indicator for this case shall
 have an `instancePath` pointing to the instance, and a `schemaPath` pointing to
 the schema member with the name `enum`.
 
 For example, the schema:
 
 ~~~ json
-{ "enum": ["PENDING", "DONE", "CANCELED"] }
+   { "enum": ["PENDING", "DONE", "CANCELED"] }
 ~~~
 
-Accepts "PENDING", "DONE", and "CANCELED", but it rejects both 123 and "UNKNOWN"
-with the standard errors:
+Accepts
 
 ~~~ json
-[{ "instancePath": "", "schemaPath": "/enum" }]
+   "PENDING"
+~~~
+
+and
+
+~~~ json
+   "DONE"
+~~~
+
+and
+
+~~~ json
+   "CANCELED"
+~~~
+
+but rejects all of
+
+~~~ json
+   0
+~~~
+
+and
+
+~~~ json
+   1
+~~~
+
+and
+
+~~~ json
+   2
+~~~
+
+and
+
+~~~ json
+   "UNKNOWN"
+~~~
+
+with the error indicator:
+
+~~~ json
+   [{ "instancePath": "", "schemaPath": "/enum" }]
 ~~~
 
 ### Elements
@@ -760,44 +1007,62 @@ If a schema is of the elements form, then let *S* be the value of the schema
 member with the name `elements`. The instance is accepted if and only if all of
 the following are true:
 
-- The instance is an array. Otherwise, the standard error for this case shall
+- The instance is an array. Otherwise, the error indicator for this case shall
   have an `instancePath` pointing to the instance, and a `schemaPath` pointing
   to the schema member with the name `elements`.
 
 - If the instance is an array, then every element of the instance must be
-  accepted by *S*. Otherwise, the standard errors for this case are the union of
-  all the errors arising from evaluating *S* against elements of the instance.
+  accepted by *S*. Otherwise, the error indicators for this case are the union
+  of all the errors arising from evaluating *S* against elements of the
+  instance.
 
-For example, if we have the schema:
+For example, the schema:
 
 ~~~ json
-{
-  "elements": {
-    "type": "float32"
-  }
-}
+   {
+     "elements": {
+       "type": "float32"
+     }
+   }
 ~~~
 
-Then the instances \[\] and \[1, 2, 3\] are accepted. If instead we evaluate
-false against that schema, the standard errors are:
+accepts
 
 ~~~ json
-[{ "instancePath": "", "schemaPath": "/elements" }]
+   []
 ~~~
 
-Finally, if we evaluate the instance:
+and
 
 ~~~ json
-[1, 2, "foo", 3, "bar"]
+   [1, 2, 3]
 ~~~
 
-The standard errors are:
+but rejects
 
 ~~~ json
-[
-  { "instancePath": "/2", "schemaPath": "/elements/type" },
-  { "instancePath": "/4", "schemaPath": "/elements/type" }
-]
+   false
+~~~
+
+with the error indicator:
+
+~~~ json
+   [{ "instancePath": "", "schemaPath": "/elements" }]
+~~~
+
+and rejects
+
+~~~ json
+   [1, 2, "foo", 3, "bar"]
+~~~
+
+with the error indicators:
+
+~~~ json
+   [
+     { "instancePath": "/2", "schemaPath": "/elements/type" },
+     { "instancePath": "/4", "schemaPath": "/elements/type" }
+   ]
 ~~~
 
 ### Properties {#semantics-form-props}
@@ -809,7 +1074,7 @@ if all of the following are true:
 
 - The instance is an object.
 
-  Otherwise, the standard error for this case shall have an `instancePath`
+  Otherwise, the error indicator for this case shall have an `instancePath`
   pointing to the instance, and a `schemaPath` pointing to the schema member
   with the name `properties` if such a schema member exists; if such a member
   doesn't exist, `schemaPath` shall point to the schema member with the name
@@ -820,7 +1085,7 @@ if all of the following are true:
   {{syntax}}, must be an object. For every member name in *P*, a member of the
   same name in the instance must exist.
 
-  Otherwise, the standard error for this case shall have an `instancePath`
+  Otherwise, the error indicator for this case shall have an `instancePath`
   pointing to the instance, and a `schemaPath` pointing to the member of *P*
   failing the requirement just described.
 
@@ -837,105 +1102,124 @@ if all of the following are true:
     additional properties" mode (see {{allow-additional-properties}}), then the
     instance is rejected.
 
-    The standard error for this case has an `instancePath` pointing to *I*, and
+    The error indicator for this case has an `instancePath` pointing to *I*, and
     a `schemaPath` pointing to the schema.
 
   - If such a member in *P* or *O* does exist, then call this member *S*. If *S*
     rejects *I*'s value, then the instance is rejected.
 
-    The standard error for this case is the union of the errors from evaluating
-    *S* against *I*'s value.
+    The error indicators for this case are the union of the error indicators
+    from evaluating *S* against *I*'s value.
 
 An instance may have multiple errors arising from the second and third bullet in
-the above. In this case, the standard errors are the union of the errors.
+the above. In this case, the error indicators are the union of the errors.
 
-For example, if we have the schema:
+For example, the schema:
 
 ~~~ json
-{
-  "properties": {
-    "a": { "type": "string" },
-    "b": { "type": "string" }
-  },
-  "optionalProperties": {
-    "c": { "type": "string" },
-    "d": { "type": "string" }
-  }
-}
+   {
+     "properties": {
+       "a": { "type": "string" },
+       "b": { "type": "string" }
+     },
+     "optionalProperties": {
+       "c": { "type": "string" },
+       "d": { "type": "string" }
+     }
+   }
 ~~~
 
-Then each of the following instances (one on each line) are accepted:
+accepts
 
 ~~~ json
-{ "a": "foo", "b": "bar" }
-{ "a": "foo", "b": "bar", "c": "baz" }
-{ "a": "foo", "b": "bar", "c": "baz", "d": "quux" }
-{ "a": "foo", "b": "bar", "d": "quux" }
+   { "a": "foo", "b": "bar" }
 ~~~
 
-If we evaluate the instance 123 against this schema, then the standard errors
-are:
+and
 
 ~~~ json
-[{ "instancePath": "", "schemaPath": "/properties" }]
+   { "a": "foo", "b": "bar", "c": "baz" }
 ~~~
 
-If instead we evalute the instance:
+and
 
 ~~~ json
-{ "b": 3, "c": 3, "e": 3 }
+   { "a": "foo", "b": "bar", "c": "baz", "d": "quux" }
 ~~~
 
-The standard errors are:
+and
 
 ~~~ json
-[
-  { "instancePath": "",
-    "schemaPath": "/properties/a" },
-  { "instancePath": "/b",
-    "schemaPath": "/properties/b/type" },
-  { "instancePath": "/c",
-    "schemaPath": "/optionalProperties/c/type" },
-  { "instancePath": "/e",
-    "schemaPath": "" }
-]
+   { "a": "foo", "b": "bar", "d": "quux" }
+~~~
+
+but rejects
+
+~~~ json
+   123
+~~~
+
+with the error indicator
+
+~~~ json
+   [{ "instancePath": "", "schemaPath": "/properties" }]
+~~~
+
+and rejects
+
+~~~ json
+   { "b": 3, "c": 3, "e": 3 }
+~~~
+
+with the error indicators
+
+~~~ json
+   [
+     { "instancePath": "",
+       "schemaPath": "/properties/a" },
+     { "instancePath": "/b",
+       "schemaPath": "/properties/b/type" },
+     { "instancePath": "/c",
+       "schemaPath": "/optionalProperties/c/type" },
+     { "instancePath": "/e",
+       "schemaPath": "" }
+   ]
 ~~~
 
 If instead the schema had `additionalProperties: true`, but was otherwise the
 same:
 
 ~~~ json
-{
-  "properties": {
-    "a": { "type": "string" },
-    "b": { "type": "string" }
-  },
-  "optionalProperties": {
-    "c": { "type": "string" },
-    "d": { "type": "string" }
-  },
-  "additionalProperties": true
-}
+   {
+     "properties": {
+       "a": { "type": "string" },
+       "b": { "type": "string" }
+     },
+     "optionalProperties": {
+       "c": { "type": "string" },
+       "d": { "type": "string" }
+     },
+     "additionalProperties": true
+   }
 ~~~
 
 And the instance remained the same:
 
 ~~~ json
-{ "b": 3, "c": 3, "e": 3 }
+   { "b": 3, "c": 3, "e": 3 }
 ~~~
 
-Then the errors from evaluating the instance against that `additionalProperties:
-true` schema would be:
+Then the error indicators from evaluating the instance the schema would be
 
 ~~~ json
-[
-  { "instancePath": "",
-    "schemaPath": "/properties/a" },
-  { "instancePath": "/b",
-    "schemaPath": "/properties/b/type" },
-  { "instancePath": "/c",
-    "schemaPath": "/optionalProperties/c/type" },
-]
+   [
+     { "instancePath": "",
+       "schemaPath": "/properties/a" },
+     { "instancePath": "/b",
+       "schemaPath": "/properties/b/type" },
+     { "instancePath": "/c",
+       "schemaPath": "/optionalProperties/c/type" },
+   ]
 ~~~
 
 These are the same errors as before, except the final error (associated with the
@@ -952,45 +1236,62 @@ If a schema is of the values form, then let *S* be the value of the schema
 member with the name `values`. The instance is accepted if and only if all of
 the following are true:
 
-- The instance is an object. Otherwise, the standard error for this case shall
+- The instance is an object. Otherwise, the error indicator for this case shall
   have an `instancePath` pointing to the instance, and a `schemaPath` pointing
   to the schema member with the name `values`.
 
 - If the instance is an object, then every member value of the instance must be
-  accepted by *S*. Otherwise, the standard errors for this case are the union of
-  all the errors arising from evaluating *S* against member values of the
-  instance.
+  accepted by *S*. Otherwise, the error indicators for this case are the union
+  of all the error indicators arising from evaluating *S* against member values
+  of the instance.
 
-For example, if we have the schema:
+For example, the schema:
 
 ~~~ json
-{
-  "values": {
-    "type": "float32"
-  }
-}
+   {
+     "values": {
+       "type": "float32"
+     }
+   }
 ~~~
 
-Then the instances {} and {"a": 1, "b": 2} are accepted. If instead we evaluate
-false against that schema, the standard errors are:
+accepts
 
 ~~~ json
-[{ "instancePath": "", "schemaPath": "/values" }]
+   {}
 ~~~
 
-Finally, if we evaluate the instance:
+and
 
 ~~~ json
-{ "a": 1, "b": 2, "c": "foo", "d": 3, "e": "bar" }
+   {"a": 1, "b": 2}
 ~~~
 
-The standard errors are:
+but rejects
 
 ~~~ json
-[
-  { "instancePath": "/c", "schemaPath": "/values/type" },
-  { "instancePath": "/e", "schemaPath": "/values/type" }
-]
+   false
+~~~
+
+with the error indicator
+
+~~~ json
+   [{ "instancePath": "", "schemaPath": "/values" }]
+~~~
+
+and rejects
+
+~~~ json
+   { "a": 1, "b": 2, "c": "foo", "d": 3, "e": "bar" }
+~~~
+
+with the error indicators
+
+~~~ json
+   [
+     { "instancePath": "/c", "schemaPath": "/values/type" },
+     { "instancePath": "/e", "schemaPath": "/values/type" }
+   ]
 ~~~
 
 ### Discriminator {#semantics-form-discriminator}
@@ -1025,23 +1326,23 @@ The instance is accepted if and only if:
 
 - The instance is an object.
 
-  Otherwise, the standard error for this case shall have an `instancePath`
+  Otherwise, the error indicator for this case shall have an `instancePath`
   pointing to the instance, and a `schemaPath` pointing to *D*.
 
 - If the instance is a JSON object, then *I* must exist.
 
-  Otherwise, the standard error for this case shall have an `instancePath`
+  Otherwise, the error indicator for this case shall have an `instancePath`
   pointing to the instance, and a `schemaPath` pointing to *T*.
 
 - If the instance is a JSON object and *I* exists, *I*'s value must be a string.
 
-  Otherwise, the standard error for this case shall have an `instancePath`
+  Otherwise, the error indicator for this case shall have an `instancePath`
   pointing to *I*, and a `schemaPath` pointing to *T*.
 
 - If the instance is a JSON object and *I* exists and has a string value, then
   *S* must exist.
 
-  Otherwise, the standard error for this case shall have an `instancePath`
+  Otherwise, the error indicator for this case shall have an `instancePath`
   pointing to *I*, and a `schemaPath` pointing to *M*.
 
 - If the instance is a JSON object, *I* exists, and *S* exists, then the
@@ -1050,123 +1351,129 @@ The instance is accepted if and only if:
   {{semantics-form-props}} to *I* when evaluating whether the instance satisfies
   *S*'s value.
 
-  Otherwise, the standard errors for this case shall be standard errors from
+  Otherwise, the error indicators for this case shall be error indicators from
   evaluating *S*'s value against the instance, with the "discriminator tag
   exemption" applied to *I*.
 
 Each of the list items above are defined to be mutually exclusive. For the same
 instance and schema, only one of the list items above will apply.
 
-To illustrate the discriminator form, if we have the schema:
+For example, the schema:
 
 ~~~ json
-{
-  "discriminator": {
-    "tag": "version",
-    "mapping": {
-      "v1": {
-        "properties": {
-          "a": { "type": "float32" }
-        }
-      },
-      "v2": {
-        "properties": {
-          "a": { "type": "string" }
-        }
-      }
-    }
-  }
-}
+   {
+     "discriminator": {
+       "tag": "version",
+       "mapping": {
+         "v1": {
+           "properties": {
+             "a": { "type": "float32" }
+           }
+         },
+         "v2": {
+           "properties": {
+             "a": { "type": "string" }
+           }
+         }
+       }
+     }
+   }
 ~~~
 
-Then if we evaluate the instance:
+rejects
 
 ~~~ json
-"example"
+   "example"
 ~~~
 
-Against this schema, the standard errors are:
+with the error indicator
 
 ~~~ json
-[{ "instancePath": "", "schemaPath": "/discriminator" }]
+   [{ "instancePath": "", "schemaPath": "/discriminator" }]
 ~~~
 
 (This is the case of the instance not being an object.)
 
-If we instead evaluate the instance:
+Also rejected is
 
 ~~~ json
-{}
+   {}
 ~~~
 
-Then the standard errors are:
+with the error indicator
 
 ~~~ json
-[{ "instancePath": "", "schemaPath": "/discriminator/tag" }]
+   [{ "instancePath": "", "schemaPath": "/discriminator/tag" }]
 ~~~
 
 (This is the case of *I* not existing.)
 
-If we instead evaluate the instance:
+Also rejected is
 
 ~~~ json
-{ "version": 1 }
+   { "version": 1 }
 ~~~
 
-Then the standard errors are:
+with the error indicator
 
 ~~~ json
-[{ "instancePath": "/version", "schemaPath": "/discriminator/tag" }]
+   [
+     {
+       "instancePath": "/version",
+       "schemaPath": "/discriminator/tag"
+     }
+   ]
 ~~~
 
 (This is the case of *I* existing, but having a string value.)
 
-If we instead evaluate the instance:
+Also rejected is
 
 ~~~ json
-{ "version": "v3" }
+   { "version": "v3" }
 ~~~
 
-Then the standard errors are:
+with the error indicator
 
 ~~~ json
-[
-  { "instancePath": "/version",
-    "schemaPath": "/discriminator/mapping" }
-]
+   [
+     {
+       "instancePath": "/version",
+       "schemaPath": "/discriminator/mapping"
+     }
+   ]
 ~~~
 
 (This is the case of *I* existing and having a string value, but *S* not
 existing.)
 
-If the instance evaluated were:
+Also rejected is
 
 ~~~ json
-{ "version": "v2", "a": 3 }
+   { "version": "v2", "a": 3 }
 ~~~
 
-Then the standard errors are:
+with the error indicator
 
 ~~~ json
-[
-  {
-    "instancePath": "/a",
-    "schemaPath": "/discriminator/mapping/v2/properties/a/type"
-  }
-]
+   [
+     {
+       "instancePath": "/a",
+       "schemaPath": "/discriminator/mapping/v2/properties/a/type"
+     }
+   ]
 ~~~
 
 (This is the case of *I* and *S* existing, but the instance not satisfying *S*'s
 value.)
 
-Finally, if instead the instance were:
+Finally, the schema accepts
 
 ~~~ json
-{ "version": "v2", "a": "foo" }
+   { "version": "v2", "a": "foo" }
 ~~~
 
-Then the instance satisfies the schema. No standard errors are returned. This is
-the case despite the fact that `version` is not mentioned by
+This instance is accepted despite the fact that `version` is not mentioned by
 `/discriminator/mapping/v2/properties`; the "discriminator tag exemption"
 ensures that `version` is not treated as an additional property when evaluating
 the instance against *S*'s value.
