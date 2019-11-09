@@ -1,7 +1,7 @@
 ---
 title: JSON Data Definition Format (JDDF)
-docname: draft-ucarion-jddf-03
-date: 2019-10-13
+docname: draft-ucarion-jddf-04
+date: 2019-11-09
 ipr: trust200902
 area: Applications
 wg: Independent Submission
@@ -162,7 +162,8 @@ being validated against a JDDF schema.
 JDDF is an experiment. Participation in this experiment consists of using JDDF
 to validate or document interchanged JSON messages, or in building tooling atop
 of JDDF. Feedback on the results of this experiment may be e-mailed to the
-author.
+author. Participants in this experiment are anticipated to mostly be nodes which
+provide or consume JSON-based APIs.
 
 Nodes know if they are participating in the experiment if they are validating
 JSON messages against a JDDF schema, or if they are relying on another node to
@@ -194,23 +195,37 @@ JDDF schemas may recursively contain other schemas. In this document, a "root
 schema" is one which is not contained within another schema, i.e. it is "top
 level".
 
-A correct JDDF schema MUST match the `schema` CDDL rule described in this
-section. A JDDF schema is a JSON object taking on an appropriate form. It may
-optionally contain definitions (a mapping from names to schemas) and additional
-data.
+A JDDF schema is a JSON object taking on an appropriate form. If the schema is a
+root schema, it may optionally contain definitions (a mapping from names to
+schemas). Schemas may contain additional data; see {{extending-jddf-syntax}} for
+how such additional data should be treated.
+
+A correct root JDDF schema MUST match the `root-schema` CDDL rule described in
+this section. If a JDDF schema, be it a root schema or a non-root schema,
+matches the `schema` rule in {{cddl-schema}}, then it is said to be a correct
+JDDF schema.
 
 ~~~ cddl
+; root-schema is identical to schema, but additionally allows for
+; definitions.
+;
+; definitions are prohibited from appearing on non-root schemas.
+root-schema = {
+  schema,
+  ? definitions: { * tstr => schema },
+}
+
+; schema is the main CDDL rule defining a JDDF schema. Certain JDDF
+; forms will be defined recursively in terms of this rule.
 schema = {
   form,
-  ? definitions: { * tstr => schema },
-  ? additionalProperties: bool,
   * non-keyword => *
 }
 
-; This definition prohibits non-keyword from matching any of the
-; keywords defined later.
+; non-keyword is constructed here so as to prevent it from matching
+; any of the keywords defined later.
 non-keyword =
-  (((((((((tstr .ne "definitions")
+  (((((((((.ne "definitions")
     .ne "additionalProperties")
     .ne "ref")
     .ne "type")
@@ -231,6 +246,20 @@ contains a number, which is not a schema:
 ~~~
 {: #def-number title="An incorrect JDDF schema. JSON numbers are not JDDF
 schemas" }
+
+{{non-root-def}} is also incorrect, as a `definitions` object may not appear on
+non-root schemas. See {{cddl-elements}} for more details on how `elements`
+works.
+
+~~~ json
+{
+  "elements": {
+    "definitions": {}
+  }
+}
+~~~
+{: #non-root-def title="An incorrect JDDF schema. \"definitions\" may appear
+only in root schemas"}
 
 {{ref-user}} is an example of a correct schema that uses `definitions`:
 
@@ -304,10 +333,6 @@ found at the root level of the schema it appears in. More formally, for a schema
 If the schema is correct, then *B* must have a member *D* with the name
 `definitions`, and *D* must contain a member whose name equals *R*.
 
-Note that, from this definition, `ref` can only refer to definitions at the root
-of the schema, and not to merely any definitions further up the tree. This
-limitation is deliberate, and aids in generating useful code from schemas.
-
 {{cddl-definitions}} is a correct example of `ref` being used to avoid
 re-defining the same thing twice:
 
@@ -340,21 +365,6 @@ doesn't exist:
 ~~~
 {: #cddl-def-no-bar title="An incorrect JDDF schema. There is no \"bar\" in
 \"definitions\"" }
-
-{{cddl-def-no-root-bar}} is incorrect as well, as it refers to a definition that
-doesn't exist at the root level. The non-root definition is immaterial:
-
-~~~ json
-{
-  "definitions": { "foo": { "type": "float32" }},
-  "elements": {
-    "definitions": { "bar": { "type": "float32" }},
-    "ref": "bar"
-  }
-}
-~~~
-{: #cddl-def-no-root-bar title="An incorrect JDDF schema. There is no \"bar\" in
-the root-level \"definitions\"" }
 
 The third form, `type`, constrains instances to have a particular primitive
 type. The precise meaning of each of the primitive types is described in
@@ -426,12 +436,14 @@ properties = with-properties / with-optional-properties
 
 with-properties = {
   properties: * tstr => schema,
-  ? optionalProperties * tstr => schema
+  ? optionalProperties * tstr => schema,
+  ? additionalProperties: bool,
 }
 
 with-optional-properties = {
   ? properties: * tstr => schema,
-  optionalProperties: * tstr => schema
+  optionalProperties: * tstr => schema,
+  ? additionalProperties: bool,
 }
 ~~~
 {: #cddl-properties title="CDDL definition of the \"properties\" form"}
@@ -561,7 +573,10 @@ pattern of data common in JSON-based messaging systems:
 {: #jddf-discriminator-message title="A correct JDDF schema using the
 \"discriminator\" form"}
 
-## Extending JDDF's Syntax
+For examples of what {{jddf-discriminator-message}} accepts and rejects, see the
+examples at the end of {{semantics-form-discriminator}}.
+
+## Extending JDDF's Syntax {#extending-jddf-syntax}
 
 This document does not describe any extension mechanisms for JDDF schema
 validation, which is described in {{semantics}}. However, schemas (through the
@@ -802,7 +817,7 @@ is rejected, and the error indicator would be:
 Though non-root definitions are not syntactically disallowed in correct schemas,
 they are entirely immaterial to evaluating references.
 
-### Type
+### Type {#form-type}
 
 The type form is meant to describe instances whose value is a boolean, number,
 string, or timestamp ({{RFC3339}}).
@@ -1509,7 +1524,7 @@ with the error indicator
    ]
 ~~~
 
-(This is the case of *I* existing, but having a string value.)
+(This is the case of *I* existing, but not having a string value.)
 
 Also rejected is
 
@@ -1562,6 +1577,124 @@ This instance is accepted despite the fact that `version` is not mentioned by
 ensures that `version` is not treated as an additional property when evaluating
 the instance against *S*'s value.
 
+To further illustrate the discriminator form with examples, recall the JDDF
+schema in {{jddf-discriminator-message}}, reproduced here:
+
+~~~ json
+   {
+     "tag": "event_type",
+     "mapping": {
+       "account_deleted": {
+         "properties": {
+           "account_id": { "type": "string" }
+         }
+       },
+       "account_payment_plan_changed": {
+         "properties": {
+           "account_id": { "type": "string" },
+           "payment_plan": { "enum": ["FREE", "PAID"] }
+         },
+         "optionalProperties": {
+           "upgraded_by": { "type": "string" }
+         }
+       }
+     }
+   }
+~~~
+
+This schema accepts
+
+~~~ json
+   { "event_type": "account_deleted", "account_id": "abc-123" }
+~~~
+
+and
+
+~~~ json
+   {
+     "event_type": "account_payment_plan_changed",
+     "account_id": "abc-123",
+     "payment_plan": "PAID"
+   }
+~~~
+
+and
+
+~~~ json
+   {
+     "event_type": "account_payment_plan_changed",
+     "account_id": "abc-123",
+     "payment_plan": "PAID",
+     "upgraded_by": "users/mkhwarizmi"
+   }
+~~~
+
+but rejects
+
+~~~ json
+   {}
+~~~
+
+with the error indicator
+
+~~~ json
+   [{ "instancePath": "", "schemaPath": "/discriminator/tag" }]
+~~~
+
+and rejects
+
+~~~ json
+   { "event_type": "some_other_event_type" }
+~~~
+
+with the error indicator
+
+~~~ json
+   [
+     {
+       "instancePath": "/event_type",
+       "schemaPath": "/discriminator/mapping"
+     }
+   ]
+~~~
+
+and rejects
+
+~~~ json
+   { "event_type": "account_deleted" }
+~~~
+
+with the error indicator
+
+~~~ json
+   [{
+     "instancePath": "",
+     "schemaPath":
+       "/discriminator/mapping/account_deleted/properties/account_id"
+   }]
+~~~
+
+and rejects
+
+~~~ json
+   {
+     "event_type": "account_payment_plan_changed",
+     "account_id": "abc-123",
+     "payment_plan": "PAID",
+     "xxx": "asdf"
+   }
+~~~
+
+with the error indicator
+
+~~~ json
+   [{
+     "instancePath": "/xxx",
+     "schemaPath":
+       "/discriminator/mapping/account_payment_plan_changed"
+   }]
+~~~
+
 # IANA Considerations
 
 No IANA considerations.
@@ -1578,6 +1711,98 @@ implementations may be vulnerable to denial-of-service attacks.
 
 --- back
 
+# Other Considerations
+
+This appendix is not normative.
+
+This section describes possible features which are intentionally left out of
+JSON Data Definition Format, and justifies why these features are omitted.
+
+## Support for 64-bit Numbers
+
+This document does not allow `int64` or `uint64` as values for the JDDF `type`
+keyword (see {{cddl-type}} and {{form-type}}). Such hypothetical `int64` or
+`uint64` types would behave like `int32` or `uint32` (respectively), but with
+the range of values associated with 64-bit instead of 32-bit integers, that is:
+
+- `int64` would accept numbers between -(2\*\*63) and (2\*\*63)-1
+- `uint64` would accept numbers between 0 and (2**64)-1
+
+Users of `int64` and `uint64` would likely expect that the full range of signed
+or unsigned 64-bit integers could interoperably be transmitted as JSON without
+loss of precision. But this assumption is likely to be incorrect, for the
+reasons given in Section 2.2 of {{RFC7493}}.
+
+`int64` and `uint64` likely would have led users to falsely assume that the full
+range of 64-bit integers can be interoperably procesed as JSON without loss of
+precision. To avoid leading users astray, JDDF omits `int64` and `uint64`.
+
+## Support for Non-Root Schemas
+
+This document disallows the `definitions` keyword from appearing outside of root
+schemas (see {{cddl-schema}}). Conceivably, this document could have instead
+allowed `definitions` to appear on any schema, even non-root ones. Under this
+alternative design, `ref`s would resolve to the "nearest" (i.e., most nested)
+schema which both contained the `ref` and which had a suitably-named
+`definitions` member.
+
+For instance, under this alternative approach, one could define schemas like the
+one in {{hypothetical-ref}}:
+
+~~~ json
+{
+  "properties": {
+    "foo": {
+      "definitions": {
+        "user": { "properties": { "user_id": {"type": "string" }}}
+      },
+      "ref": "user"
+    },
+    "bar": {
+      "definitions": {
+        "user": { "properties": { "user_id": {"type": "string" }}}
+      },
+      "ref": "user"
+    },
+    "baz": {
+      "definitions": {
+        "user": { "properties": { "userId": {"type": "string" }}}
+      },
+      "ref": "user"
+    }
+  }
+}
+~~~
+{: #hypothetical-ref title="A hypothetical schema had this document permitted
+non-root definitions. This schema is not a correct JDDF schema."}
+
+If schemas like that in {{hypothetical-ref}} were permitted, code generation
+from JDDF schemas would be more difficult, and the generated code would be less
+useful.
+
+Code generation would be more difficult because it would force code generators
+to implement a name mangling scheme for types generated from definitions. This
+additional difficulty is not immense, but adds complexity to an otherwise
+relatively trivial task.
+
+Generated code would be less useful because generated, mangled struct names are
+less pithy than human-defined struct names. For instance, the `user` definitions
+in {{hypothetical-ref}} might have been generated into types named
+`PropertiesFooUser`, `PropertiesBarUser`, and `PropertiesBazUser`; obtuse names
+like these are less useful to human-written code than names like `User`.
+
+Furthermore, even though `PropertiesFooUser` and `PropertiesBarUser` are
+essentially identical, they would not be interchangeable in many
+statically-typed programming languages. A code generator could attempt to
+circument this by deduping identical definitions, but then the user might be
+confused as to why the subtly different `PropertiesBazUser`, which would use
+`userId` instead of `user_id`, was not deduplicated.
+
+Because there seem to be a number of implementation and usability challenges
+associated with non-root definitions, and because it would be easier to later
+amend JDDF to permit for non-root definitions than to later prohibit them, this
+document does not permit non-root definitions in JDDF schemas.
+
 # Comparison with CDDL {#comparison-with-cddl}
 
 This appendix is not normative.
@@ -1586,152 +1811,187 @@ To aid the reader familiar with CDDL, this section illustrates how JDDF works by
 presenting JDDF schemas and CDDL schemas which accept and reject the same
 instances.
 
-The JDDF schema {} accepts the same instances as the CDDL rule:
+The JDDF schema:
+
+~~~ json
+   {}
+~~~
+
+accepts the same instances as the CDDL rule:
 
 ~~~ cddl
-root = any
+   root = any
 ~~~
 
 The JDDF schema:
 
 ~~~ json
-{
-  "definitions": {
-    "a": { "elements": { "ref": "b" }},
-    "b": { "type": "float32" }
-  },
-  "elements": {
-    "ref": "a"
-  }
-}
+   {
+     "definitions": {
+       "a": { "elements": { "ref": "b" }},
+       "b": { "type": "float32" }
+     },
+     "elements": {
+       "ref": "a"
+     }
+   }
 ~~~
 
-Corresponds to the CDDL schema:
+accepts the same instances as the CDDL rule:
 
 ~~~ cddl
-root = [* a]
+   root = [* a]
 
-a = [* b]
-b = number
+   a = [* b]
+   b = number
 ~~~
 
 The JDDF schema:
 
 ~~~ json
-{ "enum": ["PENDING", "DONE", "CANCELED"]}
+   { "enum": ["PENDING", "DONE", "CANCELED"]}
 ~~~
 
-Accepts the same instances as the CDDL rule:
+accepts the same instances as the CDDL rule:
 
 ~~~ cddl
-root = "PENDING" / "DONE" / "CANCELED"
-~~~
-
-The JDDF schema {"type": "boolean"} corresponds to the CDDL rule:
-
-~~~ cddl
-root = bool
-~~~
-
-The JDDF schemas {"type": "float32"} and {"type": "float64"} both correspond to
-the CDDL rule:
-
-~~~ cddl
-root = number
-~~~
-
-The JDDF schema {"type": "string"} corresponds to the CDDL rule:
-
-~~~ cddl
-root = tstr
-~~~
-
-The JDDF schema {"type": "timestamp"} corresponds to the CDDL rule:
-
-~~~ cddl
-root = tdate
+   root = "PENDING" / "DONE" / "CANCELED"
 ~~~
 
 The JDDF schema:
 
 ~~~ json
-{ "elements": { "type": "float32" }}
+   {"type": "boolean"}
 ~~~
 
-Corresponds to the CDDL rule:
+accepts the same instances as the CDDL rule:
 
 ~~~ cddl
-root = [* number]
+   root = bool
+~~~
+
+The JDDF schemas:
+
+~~~ json
+   {"type": "float32"}
+~~~
+
+and
+
+~~~ json
+   {"type": "float64"}
+~~~
+
+both accept the same instances as the CDDL rule:
+
+~~~ cddl
+   root = number
 ~~~
 
 The JDDF schema:
 
 ~~~ json
-{
-  "properties": {
-    "a": { "type": "boolean" },
-    "b": { "type": "float32" }
-  },
-  "optionalProperties": {
-    "c": { "type": "string" },
-    "d": { "type": "timestamp" }
-  }
-}
+   {"type": "string"}
 ~~~
 
-Corresponds to the CDDL rule:
+accepts the same instances as the CDDL rule:
 
 ~~~ cddl
-root = { a: bool, b: number, ? c: tstr, ? d: tdate }
+   root = tstr
 ~~~
 
 The JDDF schema:
 
 ~~~ json
-{ "values": { "type": "float32" }}
+   {"type": "timestamp"}
 ~~~
 
-Corresponds to the CDDL rule:
+accepts the same instances as the CDDL rule:
 
 ~~~ cddl
-root = { * tstr => number }
+   root = tdate
+~~~
+
+The JDDF schema:
+
+~~~ json
+   { "elements": { "type": "float32" }}
+~~~
+
+accepts the same instances as the CDDL rule:
+
+~~~ cddl
+   root = [* number]
+~~~
+
+The JDDF schema:
+
+~~~ json
+   {
+     "properties": {
+       "a": { "type": "boolean" },
+       "b": { "type": "float32" }
+     },
+     "optionalProperties": {
+       "c": { "type": "string" },
+       "d": { "type": "timestamp" }
+     }
+   }
+~~~
+
+accepts the same instances as the CDDL rule:
+
+~~~ cddl
+   root = { a: bool, b: number, ? c: tstr, ? d: tdate }
+~~~
+
+The JDDF schema:
+
+~~~ json
+   { "values": { "type": "float32" }}
+~~~
+
+accepts the same instances as the CDDL rule:
+
+~~~ cddl
+   root = { * tstr => number }
 ~~~
 
 Finally, the JDDF schema:
 
 ~~~ json
-{
-  "discriminator": {
-    "tag": "a",
-    "mapping": {
-      "foo": {
-        "properties": {
-          "b": { "type": "float32" }
-        }
-      },
-      "bar": {
-        "properties": {
-          "b": { "type": "string" }
-        }
-      }
-    }
-  }
-}
+   {
+     "discriminator": {
+       "tag": "a",
+       "mapping": {
+         "foo": {
+           "properties": {
+             "b": { "type": "float32" }
+           }
+         },
+         "bar": {
+           "properties": {
+             "b": { "type": "string" }
+           }
+         }
+       }
+     }
+   }
 ~~~
 
-Corresponds to the CDDL rule:
+accepts the same instances as the CDDL rule:
 
 ~~~ cddl
-root = { a: "foo", b: number } / { a: "bar", b: tstr }
+   root = { a: "foo", b: number } / { a: "bar", b: tstr }
 ~~~
 
 # Examples {#examples}
 
 This appendix is not normative.
 
-As a demonstration of JDDF, here is a JDDF schema closely equivalent to the
-plain-English definition `reputation-object` described in Section 6.2.2 of
-{{RFC7071}}:
+As a demonstration of JDDF, in {{asdf}} is a JDDF schema
+closely equivalent to the plain-English definition `reputation-object` described
+in Section 6.2.2 of {{RFC7071}}:
 
 ~~~ json
 {
@@ -1758,14 +2018,16 @@ plain-English definition `reputation-object` described in Section 6.2.2 of
   }
 }
 ~~~
+{: #asdf title="A JDDF schema describing \"reputation-object\" from Section
+6.6.2 of [RFC7071]"}
 
 This schema does not enforce the requirement that `sample-size`, `generated`,
 and `expires` be unbounded positive integers. It does not express the limitation
 that `rating`, `confidence`, and `normal-rating` should not have more than three
 decimal places of precision.
 
-This can be compared against the equivalent example in Appendix H of
-{{RFC8610}}.
+The example in {{asdf}} can be compared against the equivalent
+example in Appendix H of {{RFC8610}}.
 
 # Acknowledgments
 {: numbered="no"}

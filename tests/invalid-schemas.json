@@ -44,6 +44,18 @@
     }
   },
   {
+    "name": "non-root definition",
+    "schema": {
+      "definitions": {
+        "foo": {
+          "definitions": {
+            "foo": {}
+          }
+        }
+      }
+    }
+  },
+  {
     "name": "additionalProperties not a boolean",
     "schema": {
       "additionalProperties": "foo"
@@ -73,9 +85,6 @@
     "schema": {
       "definitions": {},
       "elements": {
-        "definitions": {
-          "foo": {}
-        },
         "ref": "foo"
       }
     }
