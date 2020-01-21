@@ -1,7 +1,7 @@
 ---
 title: JSON Data Definition Format (JDDF)
 docname: draft-ucarion-jddf-04
-date: 2019-11-09
+date: 2019-11-18
 ipr: trust200902
 area: Applications
 wg: Independent Submission
@@ -122,6 +122,8 @@ The principle of common patterns in JSON is why JDDF does not support 64-bit
 integers, as these are usually transmitted over JSON in a non-interoperable
 (i.e., ignoring the recommendations in Section 2.2 of {{RFC7493}}) or mutually
 inconsistent (e.g., using hexadecimal versus base64) ways.
+{{other-considerations-int64}} further elaborates on why JDDF does not support
+64-bit integers.
 
 The principle of clear correspondence to common programming languages is why
 JDDF does not support, for example, a data type for numbers up to 2**53-1.
@@ -140,9 +142,10 @@ This document has the following structure:
 
 The syntax of JDDF is defined in {{syntax}}. {{semantics}} describes the
 semantics of JDDF; this includes determining whether some data satisfies a
-schema and what errors should be produced when the data is unsatisfactory.
-{{comparison-with-cddl}} presents various JDDF schemas and their CDDL
-equivalents.
+schema and what error indicators should be produced when the data is
+unsatisfactory. {{other-considerations}} discusses why certain features are
+omitted from JDDF. {{comparison-with-cddl}} presents various JDDF schemas and
+their CDDL equivalents.
 
 ## Terminology
 
@@ -195,15 +198,13 @@ JDDF schemas may recursively contain other schemas. In this document, a "root
 schema" is one which is not contained within another schema, i.e. it is "top
 level".
 
-A JDDF schema is a JSON object taking on an appropriate form. If the schema is a
-root schema, it may optionally contain definitions (a mapping from names to
-schemas). Schemas may contain additional data; see {{extending-jddf-syntax}} for
-how such additional data should be treated.
+A JDDF schema is a JSON object taking on an appropriate form. JDDF schemas may
+contain "additional data", discussed in {{extending-jddf-syntax}}. Root JDDF
+schemas may optionally contain definitions (a mapping from names to schemas).
 
 A correct root JDDF schema MUST match the `root-schema` CDDL rule described in
-this section. If a JDDF schema, be it a root schema or a non-root schema,
-matches the `schema` rule in {{cddl-schema}}, then it is said to be a correct
-JDDF schema.
+this section. A correct non-root JDDF schema MUST match the `schema` CDDL rule
+described in this section.
 
 ~~~ cddl
 ; root-schema is identical to schema, but additionally allows for
@@ -216,7 +217,7 @@ root-schema = {
 }
 
 ; schema is the main CDDL rule defining a JDDF schema. Certain JDDF
-; forms will be defined recursively in terms of this rule.
+; schema forms will be defined recursively in terms of this rule.
 schema = {
   form,
   * non-keyword => *
@@ -226,13 +227,13 @@ schema = {
 ; any of the keywords defined later.
 non-keyword =
   (((((((((.ne "definitions")
-    .ne "additionalProperties")
     .ne "ref")
     .ne "type")
     .ne "enum")
     .ne "elements")
     .ne "properties")
     .ne "optionalProperties")
+    .ne "additionalProperties")
     .ne "values")
     .ne "discriminator"
 ~~~
@@ -249,7 +250,7 @@ schemas" }
 
 {{non-root-def}} is also incorrect, as a `definitions` object may not appear on
 non-root schemas. See {{cddl-elements}} for more details on how `elements`
-works.
+is defined in terms of the `schema` CDDL rule.
 
 ~~~ json
 {
@@ -314,6 +315,9 @@ sub-schema. Schema authors can use the empty form to describe parts of a message
 format which do not contain predictable data, or which the author does not want
 to specify.
 
+The semantics of schemas of the empty form are described in
+{{semantics-form-empty}}.
+
 The second form, `ref`, is for when a schema is defined in terms of something in
 the `definitions` of the root schema:
 
@@ -366,9 +370,12 @@ doesn't exist:
 {: #cddl-def-no-bar title="An incorrect JDDF schema. There is no \"bar\" in
 \"definitions\"" }
 
+The semantics of schemas of the `ref` form are described in
+{{semantics-form-ref}}.
+
 The third form, `type`, constrains instances to have a particular primitive
 type. The precise meaning of each of the primitive types is described in
-{{semantics}}.
+{{semantics-form-type}}.
 
 ~~~ cddl
 type = { type: "boolean" / num-type / "string" / "timestamp" }
@@ -384,6 +391,9 @@ correct {{RFC3339}} timestamps:
 { "type": "timestamp" }
 ~~~
 {: #jddf-timestamp title="A correct JDDF schema using the \"type\" form"}
+
+The semantics of schemas of the `type` form are described in
+{{semantics-form-type}}.
 
 The fourth form, `enum`, describes instances whose value must be one of a
 finite, predetermined set of values:
@@ -408,6 +418,9 @@ But {{jddf-enum-repeat}} is not a correct schema, as `B` is duplicated:
 ~~~
 {: #jddf-enum-repeat title="An incorrect JDDF schema. \"B\" appears twice."}
 
+The semantics of schemas of the `enum` form are described in
+{{semantics-form-enum}}.
+
 The fifth form, `elements`, describes instances that must be arrays. A further
 sub-schema describes the elements of the array.
 
@@ -424,6 +437,9 @@ timestamps:
 ~~~
 {: #jddf-elements-timestamp title="A correct JDDF schema using the \"elements\"
 form"}
+
+The semantics of schemas of the `elements` form are described in
+{{semantics-form-elements}}.
 
 The sixth form, `properties`, describes JSON objects being used as a "struct". A
 schema of this form specifies the names of required and optional properties, as
@@ -488,6 +504,9 @@ repeated between \"properties\" and \"optionalProperties\""}
 ~~~
 {: #jddf-list-users title="A correct JDDF schema using the \"properties\" form"}
 
+The semantics of schemas of the `properties` form are described in
+{{semantics-form-props}}.
+
 The seventh form, `values`, describes JSON objects being used as an associative
 array. A schema of this form specifies the form all member values must satisfy,
 but places no constraints on the member names:
@@ -504,6 +523,9 @@ strings to numbers:
 { "values": { "type": "float32" }}
 ~~~
 {: #jddf-values-float32 title="A correct JDDF schema using the "values" form"}
+
+The semantics of schemas of the `values` form are described in
+{{semantics-form-values}}.
 
 Finally, the eighth form, `discriminator`, describes JSON objects being used as
 a discriminated union. A schema of this form specifies the "tag" (or
@@ -573,14 +595,15 @@ pattern of data common in JSON-based messaging systems:
 {: #jddf-discriminator-message title="A correct JDDF schema using the
 \"discriminator\" form"}
 
-For examples of what {{jddf-discriminator-message}} accepts and rejects, see the
-examples at the end of {{semantics-form-discriminator}}.
+The semantics of schemas of the `discriminator` form are described in
+{{semantics-form-discriminator}}. {{semantics-form-discriminator}} also includes
+examples of what {{jddf-discriminator-message}} accepts and rejects.
 
 ## Extending JDDF's Syntax {#extending-jddf-syntax}
 
 This document does not describe any extension mechanisms for JDDF schema
 validation, which is described in {{semantics}}. However, schemas (through the
-`non-keyword` CDDL rule in {{syntax}} are defined to allow members whose names
+`non-keyword` CDDL rule in {{syntax}}) are defined to allow members whose names
 are not equal to any of the specially-defined keywords (i.e. `definitions`,
 `elements`, etc.). Call these members "non-keyword members".
 
@@ -666,7 +689,7 @@ properties"}
 The schema in {{jddf-properties-a-yes-additional}} accepts
 
 ~~~ json
-   {"a": "foo", "b": "bar"}.
+   {"a": "foo", "b": "bar"}
 ~~~
 
 Note that `additionalProperties` does not get "inherited" by sub-schemas. For
@@ -675,22 +698,30 @@ example, the JDDF schema:
 ~~~ json
    {
      "additionalProperties": true,
-     "elements": {
-       "properties": {
-         "a": { "type": "string" }
+     "properties": {
+       "a": {
+         "properties": {
+           "b": { "type": "string" }
+         }
        }
      }
    }
 ~~~
 
-rejects
+accepts
 
 ~~~ json
-   [{"a": "foo", "b": "bar"}]
+   { "a": { "b": "c" }, "foo": "bar" }
+~~~
+
+but rejects
+
+~~~ json
+   { "a": { "b": "c", "foo": "bar" }}
 ~~~
 
 because the `additionalProperties` at the root level does not affect the
-behavior of the sub-schema within `elements`.
+behavior of sub-schemas.
 
 ## Errors
 
@@ -721,7 +752,7 @@ produce when an instance is invalid.
 
 The forms a correct schema may take on are formally described in {{syntax}}.
 
-### Empty
+### Empty {#semantics-form-empty}
 
 The empty form is meant to describe instances whose values are unknown,
 unpredictable, or otherwise unconstrained by the schema.
@@ -729,7 +760,7 @@ unpredictable, or otherwise unconstrained by the schema.
 If a schema is of the empty form, then it accepts all instances. A schema of the
 empty form will never produce any error indicators.
 
-### Ref
+### Ref {#semantics-form-ref}
 
 The ref form is for when a schema is defined in terms of something in the
 `definitions` of the root schema. The ref form enables schemas to be less
@@ -817,7 +848,7 @@ is rejected, and the error indicator would be:
 Though non-root definitions are not syntactically disallowed in correct schemas,
 they are entirely immaterial to evaluating references.
 
-### Type {#form-type}
+### Type {#semantics-form-type}
 
 The type form is meant to describe instances whose value is a boolean, number,
 string, or timestamp ({{RFC3339}}).
@@ -1030,7 +1061,7 @@ indicator to produce is:
    [{ "instancePath": "", "schemaPath": "/type" }]
 ~~~
 
-### Enum
+### Enum {#semantics-form-enum}
 
 The enum form is meant to describe instances whose value must be one of a
 finite, predetermined set of string values.
@@ -1097,7 +1128,7 @@ with the error indicator:
    [{ "instancePath": "", "schemaPath": "/enum" }]
 ~~~
 
-### Elements
+### Elements {#semantics-form-elements}
 
 The elements form is meant to describe instances that must be arrays. A further
 sub-schema describes the elements of the array.
@@ -1326,7 +1357,7 @@ additional member named `e` in the instance) is no longer present. This is
 because `additionalProperties: true` enables "allow additional properties" mode
 on the schema.
 
-### Values
+### Values {#semantics-form-values}
 
 The elements form is meant to describe instances that are JSON objects being
 used as an associative array.
@@ -1711,19 +1742,20 @@ implementations may be vulnerable to denial-of-service attacks.
 
 --- back
 
-# Other Considerations
+# Other Considerations {#other-considerations}
 
 This appendix is not normative.
 
 This section describes possible features which are intentionally left out of
 JSON Data Definition Format, and justifies why these features are omitted.
 
-## Support for 64-bit Numbers
+## Support for 64-bit Numbers {#other-considerations-int64}
 
 This document does not allow `int64` or `uint64` as values for the JDDF `type`
-keyword (see {{cddl-type}} and {{form-type}}). Such hypothetical `int64` or
-`uint64` types would behave like `int32` or `uint32` (respectively), but with
-the range of values associated with 64-bit instead of 32-bit integers, that is:
+keyword (see {{cddl-type}} and {{semantics-form-type}}). Such hypothetical
+`int64` or `uint64` types would behave like `int32` or `uint32` (respectively),
+but with the range of values associated with 64-bit instead of 32-bit integers,
+that is:
 
 - `int64` would accept numbers between -(2\*\*63) and (2\*\*63)-1
 - `uint64` would accept numbers between 0 and (2**64)-1
@@ -1742,9 +1774,9 @@ precision. To avoid leading users astray, JDDF omits `int64` and `uint64`.
 This document disallows the `definitions` keyword from appearing outside of root
 schemas (see {{cddl-schema}}). Conceivably, this document could have instead
 allowed `definitions` to appear on any schema, even non-root ones. Under this
-alternative design, `ref`s would resolve to the "nearest" (i.e., most nested)
-schema which both contained the `ref` and which had a suitably-named
-`definitions` member.
+alternative design, `ref`s would resolve to a definition in the "nearest" (i.e.,
+most nested) schema which both contained the `ref` and which had a
+suitably-named `definitions` member.
 
 For instance, under this alternative approach, one could define schemas like the
 one in {{hypothetical-ref}}:
@@ -1774,7 +1806,7 @@ one in {{hypothetical-ref}}:
 }
 ~~~
 {: #hypothetical-ref title="A hypothetical schema had this document permitted
-non-root definitions. This schema is not a correct JDDF schema."}
+non-root definitions. This is not a correct JDDF schema."}
 
 If schemas like that in {{hypothetical-ref}} were permitted, code generation
 from JDDF schemas would be more difficult, and the generated code would be less
@@ -1791,16 +1823,16 @@ in {{hypothetical-ref}} might have been generated into types named
 `PropertiesFooUser`, `PropertiesBarUser`, and `PropertiesBazUser`; obtuse names
 like these are less useful to human-written code than names like `User`.
 
-Furthermore, even though `PropertiesFooUser` and `PropertiesBarUser` are
+Furthermore, even though `PropertiesFooUser` and `PropertiesBarUser` would be
 essentially identical, they would not be interchangeable in many
 statically-typed programming languages. A code generator could attempt to
-circument this by deduping identical definitions, but then the user might be
-confused as to why the subtly different `PropertiesBazUser`, which would use
-`userId` instead of `user_id`, was not deduplicated.
+circumvent this by deduplicating identical definitions, but then the user might
+be confused as to why the subtly distinct `PropertiesBazUser`, defined from a
+schema allowing a property named `userId` (not `user_id`), was not deduplicated.
 
-Because there seem to be a number of implementation and usability challenges
-associated with non-root definitions, and because it would be easier to later
-amend JDDF to permit for non-root definitions than to later prohibit them, this
+Because there seem to be implementation and usability challenges associated with
+non-root definitions, and because it would be easier to later amend JDDF to
+permit for non-root definitions than to later amend JDDF to prohibit them, this
 document does not permit non-root definitions in JDDF schemas.
 
 # Comparison with CDDL {#comparison-with-cddl}
@@ -1989,7 +2021,7 @@ accepts the same instances as the CDDL rule:
 
 This appendix is not normative.
 
-As a demonstration of JDDF, in {{asdf}} is a JDDF schema
+As a demonstration of JDDF, in {{jddf-reputation-object}} is a JDDF schema
 closely equivalent to the plain-English definition `reputation-object` described
 in Section 6.2.2 of {{RFC7071}}:
 
@@ -2018,15 +2050,15 @@ in Section 6.2.2 of {{RFC7071}}:
   }
 }
 ~~~
-{: #asdf title="A JDDF schema describing \"reputation-object\" from Section
-6.6.2 of [RFC7071]"}
+{: #jddf-reputation-object title="A JDDF schema describing \"reputation-object\"
+from Section 6.6.2 of [RFC7071]"}
 
 This schema does not enforce the requirement that `sample-size`, `generated`,
 and `expires` be unbounded positive integers. It does not express the limitation
 that `rating`, `confidence`, and `normal-rating` should not have more than three
 decimal places of precision.
 
-The example in {{asdf}} can be compared against the equivalent
+The example in {{jddf-reputation-object}} can be compared against the equivalent
 example in Appendix H of {{RFC8610}}.
 
 # Acknowledgments
