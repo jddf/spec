@@ -34,7 +34,7 @@ informative:
   RFC7493:
   I-D.handrews-json-schema:
   OPENAPI:
-    target: http://spec.openapis.org/oas/v3.0.2
+    target: https://spec.openapis.org/oas/v3.0.2
     title: OpenAPI Specification
     author:
       org: OpenAPI Initiative
@@ -187,6 +187,9 @@ If this experiment is deemed successful, and JDDF is determined to be a valuable
 and popular approach, it may be taken to the IETF for further discussion and
 revision. One possible outcome of this discussion and revision could be that a
 working group produces a Standards Track specification of JDDF.
+
+Some implementations of JDDF, as well as code generators and other tooling
+related to JDDF, are available at \<https://github.com/jddf\>.
 
 # Syntax {#syntax}
 
