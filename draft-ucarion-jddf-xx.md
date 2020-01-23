@@ -1,7 +1,7 @@
 ---
 title: JSON Data Definition Format (JDDF)
-docname: draft-ucarion-jddf-04
-date: 2019-11-18
+docname: draft-ucarion-jddf-05
+date: 2020-01-23
 ipr: trust200902
 area: Applications
 wg: Independent Submission
